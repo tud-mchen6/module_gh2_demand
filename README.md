@@ -87,3 +87,4 @@ These downloaded data are mostly historical data, i.e., how the energy system ha
 ### TODO lists
 - Make it compatible to countries that have no data input in IEA
 - Make the population rule compatible to other scenarios than Medium
+- `country_level_overwrite.csv` does not look like optional in the default settings. Need to update so that it is actually optional (and the user does not have to manually put that into `resources/user` to make the workflow work.)
