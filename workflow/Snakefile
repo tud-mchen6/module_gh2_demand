@@ -19,7 +19,12 @@ with open(workflow.source_path("internal/settings.yaml"), "r") as f:
 
 # Add all your includes here.
 include: "rules/automatic.smk"
-include: "rules/dummy.smk"
+include: "rules/process_data.smk"
+include: "rules/calculate_demand.smk"
+
+# Get necessary params to produce the final files
+scenario_name = config["required"]["scenario_name"]
+population_ref_year = config["required"]["population_ref_year"]
 
 # Add additional files to be delivered alongside the workflow here.
 # This is needed e.g. for python code files that are never
@@ -28,13 +33,11 @@ include: "rules/dummy.smk"
 
 rule all:
     message:
-        "ERROR: Invalid `rule all:` call"
+        "Generate both demand files as given."
+    input:
+        vRES_demand=expand("results/demand/demand_vRES_{population_ref_year}_{scenario_name}.csv",
+            population_ref_year=population_ref_year, scenario_name=scenario_name),
+        GH2_demand=expand("results/demand/demand_GH2_{population_ref_year}_{scenario_name}.csv",
+            population_ref_year=population_ref_year, scenario_name=scenario_name),
     default_target: True
-    output:
-        "INVALID",
-    log:
-        stderr="logs/all.stderr",
-    conda:
-        "envs/shell.yaml"
-    shell:
-        'echo "This workflow must be called as a snakemake module." > {log.stderr}'
+

@@ -1,2 +1,60 @@
 # A minimal example of how to configure this module
-dummy_text: This is a user input.
+
+required:
+  scenario_name: "test"
+
+  # Default values defined for all countries. If specification is needed, the users can 
+  # define overwrites in files under resources/user.
+
+  # In GJ, the (average) total final energy consumption per capita per year assumed for 
+  # a country. Decent living level is 14~18, depending on the country. Current high-consumption
+  # countries can be up to ~120. 
+  tot_per_capita_TFC: 71.5
+  # Whether to use historical reference value of per capita TFC. If yes, then all user-input values
+  # are invalid.
+  historical_per_capita_TFC: True
+  # Whether to keep the share of each sector in TFC as historical value. If yes, then all user-input
+  # values are invalid.
+  historical_sector_TFC_share: True
+  # The ratio of assumed electrification rate compared to reference values. 1 is the current
+  # level. If the resulting electrification exceeds 1, it will be corrected to 1.
+  sector_elec_rate_rel: 2
+  # If the reference value is 0, the targeted value is defined here.
+  # In case the assumed levels are lower than the reference, there
+  # will be a warning in the final output file.
+  elec_rate_in_case_zero: 0.3
+  # Whether to use historical reference value of electrification rate for each sector in each country.
+  # If yes, all user-input values in this regard are invalid.
+  historical_elec_rate: True
+  # The ratio of assumed electricity decarbonisation level compared to reference values.
+  # In case the assumed levels are lower than the reference, there
+  # will be a warning in the final output file.
+  elec_decarb_rel: 3
+  elec_decarb_in_case_zero: 0.1
+  # Whether to use historical reference value of decarbonisation level of electricity for each
+  # country. 
+  historical_elec_decarb: True
+  # The ratio of assumed non-electricity decarbonisation level compared to reference values.
+  non_elec_decarb_rel: 1.8
+  non_elec_decarb_in_case_zero: 0.05
+  # Whether to use historical reference value of decarbonisation level of non-electricity for each
+  # country. 
+  historical_non_elec_decarb: True
+
+  # The year to take population projection for. If the scenario means the future, this should be 
+  # a future year.
+  population_ref_year: 2023
+  # WPP has several population projection scenarios. Medium is the one with historical values.
+  population_scenario: "Medium"
+
+  # Whether to download data for all countries available in the IEA dataset.
+  download_default_countries: True
+
+
+optional:
+  # # Specifically selected countries
+  # countries:
+  #   - CHN
+  #   - ARG
+  #   - BGR
+  # year_for_IEA_balance: 2023

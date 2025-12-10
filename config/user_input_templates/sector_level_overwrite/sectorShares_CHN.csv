@@ -1,0 +1,9 @@
+,sector_share,sector_elec_rate_abs,sector_elec_rate_rel,elec_decarb_abs,elec_decarb_rel,non_elec_decarb_abs,non_elec_decarb_rel
+TOTIND,0.3,,2.5,,,,
+TOTTRANS,0.3,,3,,,,
+RESIDENT,0.2,0.2,,,,,
+COMMPUB,0.2,,,,,,
+AGRICULT,0,,,,2,,
+FISHING,0,,,0.2,,,
+ONONSPEC,0,,,,,,
+NONENUSE,0,,,,,,
