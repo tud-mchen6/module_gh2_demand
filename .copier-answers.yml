@@ -1,0 +1,19 @@
+# Changes here will be overwritten by Copier
+# DO NOT MANUALLY MODIFY THIS FILE
+_commit: latest
+_src_path: https://github.com/calliope-project/data-module-template.git
+author_email: m.chen-4@tudelft.nl
+author_family_name: Chen
+author_given_name: Meijun
+github_org: calliope-project
+license: Apache-2.0
+module_description: "This module helps producing the demand number for electricity\n\
+    \    demand met by variable Renewable Energy Sources and green hydrogen demand\
+    \ based\n    on assumptions of per capita total final energy use, sectoral electrification\n\
+    \    and decarbonisation level, and population of each country. It uses a top-down\n\
+    \    approach and allows different outputs with changing assumptions. For countries\n\
+    \    included in the Energy Statistics Data Browser, the assumptions can be based\
+    \ on\n    today's data as a reference."
+module_long_name: Global per-country estimates of electricity demand met by vRES and
+    green hydrogen demand
+module_short_name: module_gh2_demand
