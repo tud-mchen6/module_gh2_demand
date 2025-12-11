@@ -16,9 +16,9 @@ def get_target_elec_rate(
         sector_elec_rate_rel : float,
         elec_rate_in_case_zero : float,
         sector_overwrite_dir : str,
-        country_specific_overwrite : str,
         reference_sector_elec_rate : str,
-        output_file : str
+        output_file : str,
+        country_specific_overwrite : str = None,
 ):
     """
     Get the target sectoral electrification rate for each country,
@@ -50,28 +50,30 @@ def get_target_elec_rate(
             lambda x: scale_or_initialise(x, sector_elec_rate_rel, elec_rate_in_case_zero))
 
         # Get all country specific overwrites (low priority, higher than config default)
-        country_level_overwrite_df = pd.read_csv(country_specific_overwrite, index_col=0)
-        for country in list(country_level_overwrite_df.index):
-            # Users could choose to determine directly an absolute electrification rate,
-            # or to define a relative increase compared to the current value, that is different
-            # from that defined in config. But these two cannot exist at the same time.
-            abs = country_level_overwrite_df.loc[country, 'sector_elec_rate_abs']
-            rel = country_level_overwrite_df.loc[country, 'sector_elec_rate_rel']
-            if pd.notna(abs) and pd.notna(rel):
-                print("Input error: relative values and absolute values cannot be given at the same time for " \
-                "electrification rate.")
-            elif pd.notna(abs):
-                target_df.loc[country] = abs
-                for sector in reference_df.columns:
-                    if reference_df.at[country, sector] > abs:
-                        print("Input warning: given electrification lower than historical value"
-                                            f" in {sector} sector in {country}.")
-            elif pd.notna(rel):
-                target_df.loc[country] = reference_df.loc[country].apply(lambda x: scale_or_initialise(x, 
-                                                            rel,
-                                                            elec_rate_in_case_zero))
-            else:
-                continue
+        if country_specific_overwrite is not None:
+            breakpoint()
+            country_level_overwrite_df = pd.read_csv(country_specific_overwrite, index_col=0)
+            for country in list(country_level_overwrite_df.index):
+                # Users could choose to determine directly an absolute electrification rate,
+                # or to define a relative increase compared to the current value, that is different
+                # from that defined in config. But these two cannot exist at the same time.
+                abs = country_level_overwrite_df.loc[country, 'sector_elec_rate_abs']
+                rel = country_level_overwrite_df.loc[country, 'sector_elec_rate_rel']
+                if pd.notna(abs) and pd.notna(rel):
+                    print("Input error: relative values and absolute values cannot be given at the same time for " \
+                    "electrification rate.")
+                elif pd.notna(abs):
+                    target_df.loc[country] = abs
+                    for sector in reference_df.columns:
+                        if reference_df.at[country, sector] > abs:
+                            print("Input warning: given electrification lower than historical value"
+                                                f" in {sector} sector in {country}.")
+                elif pd.notna(rel):
+                    target_df.loc[country] = reference_df.loc[country].apply(lambda x: scale_or_initialise(x, 
+                                                                rel,
+                                                                elec_rate_in_case_zero))
+                else:
+                    continue
 
 
         # Get all sector specific overwrites (highest priority)
@@ -83,12 +85,12 @@ def get_target_elec_rate(
                 country = file_name.split("_")[-1]
                 # Only get the ones where country is within the countries list
                 if country in countries:
-                    country_specific_overwrite = pd.read_csv(file,index_col=0)
+                    country_sector_specific_overwrite = pd.read_csv(file,index_col=0)
                     # Check if the value that the user gives is coherent. If not,
                     # fall back to the default
-                    for sector in list(country_specific_overwrite.index):
-                        abs = country_specific_overwrite.loc[sector, 'sector_elec_rate_abs']
-                        rel = country_specific_overwrite.loc[sector, 'sector_elec_rate_rel']
+                    for sector in list(country_sector_specific_overwrite.index):
+                        abs = country_sector_specific_overwrite.loc[sector, 'sector_elec_rate_abs']
+                        rel = country_sector_specific_overwrite.loc[sector, 'sector_elec_rate_rel']
                         if pd.notna(abs) and pd.notna(rel):
                             print("Input error: relative values and absolute values cannot be given at the same time for " \
                                 "electrification rate.")

@@ -9,7 +9,7 @@ def calculate_GH2_demand(output_dir : str, output_file : str,
                           sector_TFC_share: str, sector_electrification : str, 
                           sector_non_elec_decarb : str, population: str,
                           tot_per_capita_TFC: float,
-                          country_overwrite: str,
+                          country_overwrite: str = None,
                           ):
     
     """

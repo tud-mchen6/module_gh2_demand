@@ -52,7 +52,8 @@ rule get_target_elec_rate_by_sector:
     params:
         countries=config.get("countries", []) or available_countries,
         ref_year=ref_year,
-        country_overwrite="resources/user/country_level_overwrite.csv",
+        # country_overwrite="resources/user/country_level_overwrite.csv",
+        country_overwrite=lambda wc: "resources/user/country_level_overwrite.csv" if os.path.exists("resources/user/country_level_overwrite.csv") else None,
         sector_overwrite_dir="resources/user/sector_level_overwrite",
         scenario_name=scenario_name,
         sector_elec_rate_rel=config["required"]["sector_elec_rate_rel"],
@@ -64,6 +65,8 @@ rule get_target_elec_rate_by_sector:
         )
     output:
         output_file="resources/prepare/target_sector_elec_rate_{scenario_name}.csv"
+    conda:
+        "../envs/default.yaml"
     script:
         "../scripts/get_target_elec_rate.py"
 
