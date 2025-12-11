@@ -7,7 +7,7 @@ configfile: "config/config.yaml"
 
 # If default_countries is True, get all available countries from IEA dataset
 if config["required"]["download_default_countries"]:
-    country_codes = pd.read_csv("resources/automatic/country_codes.csv")
+    country_codes = pd.read_csv("workflow/internal/country_codes.csv")
     available_countries = country_codes.loc[country_codes['IEA'].notna(), 'ISO3'].tolist()
 # If config defines specific countries, use those; otherwise use all found ones
 requested_countries = (config.get("optional") or {}).get("countries") or available_countries

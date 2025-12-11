@@ -11,7 +11,7 @@ if not config["required"]["download_default_countries"]:
     requested_countries = config.get("optional", {}).get("countries")
 else:
     # If default_countries is True, get all available countries from IEA dataset
-    country_codes = pd.read_csv("resources/automatic/country_codes.csv")
+    country_codes = pd.read_csv("workflow/internal/country_codes.csv")
     requested_countries = country_codes.loc[country_codes['IEA'].notna(), 'ISO3'].tolist()
 population_scenario = config["required"]["population_scenario"]
 
@@ -23,7 +23,7 @@ rule download_balances_IEA:
         output_dir="resources/automatic/IEA_energy_balances/",
         year=year
     input:
-        country_codes_file="resources/automatic/country_codes.csv",
+        country_codes_file="workflow/internal/country_codes.csv",
     output:
         expand("resources/automatic/IEA_energy_balances/IEA_EnergyBalance_{country}_{year}.csv",
             country=requested_countries, year=year)
@@ -48,7 +48,7 @@ rule download_elec_heat_balances_IEA:
         output_dir="resources/automatic/IEA_elec_heat_balances/",
         year=year
     input:
-        country_codes_file="resources/automatic/country_codes.csv",
+        country_codes_file="workflow/internal/country_codes.csv",
     output:
         expand("resources/automatic/IEA_elec_heat_balances/IEA_elec_heat_balances_{country}_{year}.csv",
             country=requested_countries, year=year)
