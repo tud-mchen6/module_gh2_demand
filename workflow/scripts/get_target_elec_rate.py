@@ -51,7 +51,6 @@ def get_target_elec_rate(
 
         # Get all country specific overwrites (low priority, higher than config default)
         if country_specific_overwrite is not None:
-            breakpoint()
             country_level_overwrite_df = pd.read_csv(country_specific_overwrite, index_col=0)
             for country in list(country_level_overwrite_df.index):
                 # Users could choose to determine directly an absolute electrification rate,
@@ -124,8 +123,8 @@ if __name__ == "__main__":
         sector_elec_rate_rel=snakemake.params.sector_elec_rate_rel,
         elec_rate_in_case_zero=snakemake.params.elec_rate_in_case_zero,
         sector_overwrite_dir=snakemake.params.sector_overwrite_dir,
-        country_specific_overwrite=snakemake.params.country_overwrite,
         reference_sector_elec_rate=snakemake.input.reference_sector_elec_rate,
         output_file=snakemake.output.output_file,
+        country_specific_overwrite=snakemake.params.country_overwrite,
     )
 

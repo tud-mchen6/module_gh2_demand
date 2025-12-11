@@ -83,7 +83,7 @@ rule get_target_elec_decarb:
     params:
         countries=config.get("countries", []) or available_countries,
         ref_year=ref_year,
-        country_overwrite="resources/user/country_level_overwrite.csv",
+        country_overwrite=lambda wc: "resources/user/country_level_overwrite.csv" if os.path.exists("resources/user/country_level_overwrite.csv") else None,
         sector_overwrite_dir="resources/user/sector_level_overwrite",
         scenario_name=scenario_name,
         elec_decarb_rel=config["required"]["elec_decarb_rel"],
@@ -95,6 +95,8 @@ rule get_target_elec_decarb:
         )
     output:
         output_file="resources/prepare/target_elec_decarb_{scenario_name}.csv"
+    conda:
+        "../envs/default.yaml"
     script:
         "../scripts/get_target_elec_decarb.py"
 
@@ -111,7 +113,7 @@ rule get_target_non_elec_decarb:
     params:
         countries=config.get("countries", []) or available_countries,
         ref_year=ref_year,
-        country_overwrite="resources/user/country_level_overwrite.csv",
+        country_overwrite=lambda wc: "resources/user/country_level_overwrite.csv" if os.path.exists("resources/user/country_level_overwrite.csv") else None,
         sector_overwrite_dir="resources/user/sector_level_overwrite",
         scenario_name=scenario_name,
         non_elec_decarb_rel=config["required"]["non_elec_decarb_rel"],
@@ -121,6 +123,8 @@ rule get_target_non_elec_decarb:
         reference_sector_non_elec_decarb=lambda wc: (
             f"resources/processed/IEA_historical_non_elec_decarb_{ref_year}.csv"
         )
+    conda:
+        "../envs/default.yaml"
     output:
         output_file="resources/prepare/target_non_elec_decarb_{scenario_name}.csv"
     script:
@@ -135,12 +139,12 @@ rule calculate_vRES_demand:
     params:
         output_dir="results/demand/",
         tot_per_capita_TFC=config["required"]["tot_per_capita_TFC"],
+        country_overwrite=lambda wc: "resources/user/country_level_overwrite.csv" if os.path.exists("resources/user/country_level_overwrite.csv") else None,
         use_historical_per_capita_TFC=config["required"]["historical_per_capita_TFC"],
         ref_year=ref_year,
     input:
         historical_per_capita_TFC=lambda wc: (
             f"resources/processed/historical_per_capita_TFC_{ref_year}.csv"),
-        country_overwrite="resources/user/country_level_overwrite.csv",
         sector_TFC_share="resources/prepare/target_sector_TFC_share_{scenario_name}.csv",
         sector_electrification="resources/prepare/target_sector_elec_rate_{scenario_name}.csv",
         sector_elec_decarb="resources/prepare/target_elec_decarb_{scenario_name}.csv",
@@ -148,6 +152,8 @@ rule calculate_vRES_demand:
         hydro_nuclear_prod=lambda wc: (
             f"resources/processed/IEA_historical_hydro_nuclear_prod_{ref_year}.csv"),
         population="resources/processed/population_{population_ref_year}.csv",
+    conda:
+        "../envs/default.yaml"
     output:
         output_file="results/demand/demand_vRES_{population_ref_year}_{scenario_name}.csv",
     script:
@@ -163,15 +169,17 @@ rule calculate_GH2_demand:
         output_dir="results/demand/",
         tot_per_capita_TFC=config["required"]["tot_per_capita_TFC"],
         use_historical_per_capita_TFC=config["required"]["historical_per_capita_TFC"],
+        country_overwrite=lambda wc: "resources/user/country_level_overwrite.csv" if os.path.exists("resources/user/country_level_overwrite.csv") else None,
         ref_year=ref_year,
     input:
         historical_per_capita_TFC=lambda wc: (
             f"resources/processed/historical_per_capita_TFC_{ref_year}.csv"),
-        country_overwrite="resources/user/country_level_overwrite.csv",
         sector_TFC_share="resources/prepare/target_sector_TFC_share_{scenario_name}.csv",
         sector_electrification="resources/prepare/target_sector_elec_rate_{scenario_name}.csv",
         sector_non_elec_decarb="resources/prepare/target_non_elec_decarb_{scenario_name}.csv",
         population="resources/processed/population_{population_ref_year}.csv",
+    conda:
+        "../envs/default.yaml"
     output:
         output_file="results/demand/demand_GH2_{population_ref_year}_{scenario_name}.csv",
     script:

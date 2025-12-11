@@ -50,11 +50,12 @@ def calculate_GH2_demand(output_dir : str, output_file : str,
     else:
         TFC_df = pd.DataFrame({'TFC_per_capita':tot_per_capita_TFC}, index=frame.index)
         # Check if any country-specific input is defined by user
-        overwrite_TFC_df = pd.read_csv(country_overwrite, index_col=0)[['TFC_per_capita']]
-        overwrite_countries = list(overwrite_TFC_df.index)
-        for country in overwrite_countries:
-            if overwrite_TFC_df.at[country, 'TFC_per_capita'] > 0:
-                TFC_df.at[country, 'TFC_per_capita'] = overwrite_TFC_df.at[country, 'TFC_per_capita']
+        if country_overwrite is not None:
+            overwrite_TFC_df = pd.read_csv(country_overwrite, index_col=0)[['TFC_per_capita']]
+            overwrite_countries = list(overwrite_TFC_df.index)
+            for country in overwrite_countries:
+                if overwrite_TFC_df.at[country, 'TFC_per_capita'] > 0:
+                    TFC_df.at[country, 'TFC_per_capita'] = overwrite_TFC_df.at[country, 'TFC_per_capita']
     # Get the sectoral TFC from the share
     df_sector_TFC = df_sector_TFC_share.mul(TFC_df['TFC_per_capita'], axis=0)
     # Calculate the electrified parts
@@ -90,5 +91,5 @@ if __name__ == "__main__":
         sector_non_elec_decarb=snakemake.input.sector_non_elec_decarb,
         population=snakemake.input.population,
         tot_per_capita_TFC=snakemake.params.tot_per_capita_TFC,
-        country_overwrite=snakemake.input.country_overwrite,
+        country_overwrite=snakemake.params.country_overwrite,
     )

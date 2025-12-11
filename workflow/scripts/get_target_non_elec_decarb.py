@@ -18,9 +18,9 @@ def get_target_non_elec_decarb(
         non_elec_decarb_rel : float,
         non_elec_decarb_in_case_zero : float,
         sector_overwrite_dir : str,
-        country_specific_overwrite : str,
         reference_sector_non_elec_decarb : str,
-        output_file : str
+        output_file : str,
+        country_specific_overwrite : str = None,
 ):
     """
     Get the target decarbonisation level for non-electricity for each country,
@@ -45,34 +45,36 @@ def get_target_non_elec_decarb(
     """
 
     # Get the historical reference values
-    sector = 'ELEC_DECARB'
+    # sector = 'ELEC_DECARB'
     reference_df = pd.read_csv(reference_sector_non_elec_decarb, index_col=0)
     if not use_historical:
         target_df = reference_df.copy().map(
             lambda x: scale_or_initialise(x, non_elec_decarb_rel, non_elec_decarb_in_case_zero))
 
         # Get all country specific overwrites (low priority, higher than config default)
-        country_level_overwrite_df = pd.read_csv(country_specific_overwrite, index_col=0)
-        for country in list(country_level_overwrite_df.index):
-            # Users could choose to determine directly an absolute decarbonisation level,
-            # or to define a relative increase compared to the current value, that is different
-            # from that defined in config. But these two cannot exist at the same time.
-            abs = country_level_overwrite_df.loc[country, 'non_elec_decarb_abs']
-            rel = country_level_overwrite_df.loc[country, 'non_elec_decarb_rel']
-            if pd.notna(abs) and pd.notna(rel):
-                print("Input error: relative values and absolute values cannot be given at the same time for " \
-                "non-electricity decarbonisation level.")
-            elif pd.notna(abs):
-                target_df.loc[country] = abs
-                if reference_df.at[country, sector] > abs:
-                    print("Input warning: given non-electricity decarbonisation level lower than historical value"
-                                            f" in {sector} sector in {country}.")
-            elif pd.notna(rel):
-                target_df.loc[country] = reference_df.loc[country].apply(lambda x: scale_or_initialise(x, 
-                                                            rel,
-                                                            non_elec_decarb_in_case_zero))
-            else:
-                continue
+        if country_specific_overwrite is not None:
+            country_level_overwrite_df = pd.read_csv(country_specific_overwrite, index_col=0)
+            for country in list(country_level_overwrite_df.index):
+                # Users could choose to determine directly an absolute decarbonisation level,
+                # or to define a relative increase compared to the current value, that is different
+                # from that defined in config. But these two cannot exist at the same time.
+                abs = country_level_overwrite_df.loc[country, 'non_elec_decarb_abs']
+                rel = country_level_overwrite_df.loc[country, 'non_elec_decarb_rel']
+                if pd.notna(abs) and pd.notna(rel):
+                    print("Input error: relative values and absolute values cannot be given at the same time for " \
+                    "non-electricity decarbonisation level.")
+                elif pd.notna(abs):
+                    target_df.loc[country] = abs
+                    for sector in list(reference_df.columns):
+                        if reference_df.at[country, sector] > abs:
+                            print("Input warning: given non-electricity decarbonisation level lower than historical value"
+                                                    f" in {sector} sector in {country}.")
+                elif pd.notna(rel):
+                    target_df.loc[country] = reference_df.loc[country].apply(lambda x: scale_or_initialise(x, 
+                                                                rel,
+                                                                non_elec_decarb_in_case_zero))
+                else:
+                    continue
 
 
         # Get all sector specific overwrites (highest priority)
@@ -84,12 +86,12 @@ def get_target_non_elec_decarb(
                 country = file_name.split("_")[-1]
                 # Only get the ones where country is within the countries list
                 if country in countries:
-                    country_specific_overwrite = pd.read_csv(file,index_col=0)
+                    country_sector_specific_overwrite = pd.read_csv(file,index_col=0)
                     # Check if the value that the user gives is coherent. If not,
                     # fall back to the default
-                    for sector in list(country_specific_overwrite.index):
-                        abs = country_specific_overwrite.loc[sector, 'non_elec_decarb_abs']
-                        rel = country_specific_overwrite.loc[sector, 'non_elec_decarb_rel']
+                    for sector in list(country_sector_specific_overwrite.index):
+                        abs = country_sector_specific_overwrite.loc[sector, 'non_elec_decarb_abs']
+                        rel = country_sector_specific_overwrite.loc[sector, 'non_elec_decarb_rel']
                         if pd.notna(abs) and pd.notna(rel):
                             print("Input error: relative values and absolute values cannot be given at the same time for " \
                                 "non-electricity decarbonisation level.")
@@ -124,8 +126,8 @@ if __name__ == "__main__":
         non_elec_decarb_rel=snakemake.params.non_elec_decarb_rel,
         non_elec_decarb_in_case_zero=snakemake.params.non_elec_decarb_in_case_zero,
         sector_overwrite_dir=snakemake.params.sector_overwrite_dir,
-        country_specific_overwrite=snakemake.params.country_overwrite,
         reference_sector_non_elec_decarb=snakemake.input.reference_sector_non_elec_decarb,
         output_file=snakemake.output.output_file,
+        country_specific_overwrite=snakemake.params.country_overwrite,
     )
 

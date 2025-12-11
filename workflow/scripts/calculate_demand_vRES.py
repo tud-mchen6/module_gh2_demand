@@ -10,7 +10,7 @@ def calculate_vRES_demand(output_dir : str, output_file : str,
                           sector_elec_decarb : str, population: str,
                           elec_loss_rate : str,
                           hydro_nuclear_prod : str, tot_per_capita_TFC: float,
-                          country_overwrite: str,
+                          country_overwrite: str = None,
                           ):
     
     """
@@ -59,11 +59,14 @@ def calculate_vRES_demand(output_dir : str, output_file : str,
     else:
         TFC_df = pd.DataFrame({'TFC_per_capita':tot_per_capita_TFC}, index=frame.index)
         # Check if any country-specific input is defined by user
-        overwrite_TFC_df = pd.read_csv(country_overwrite, index_col=0)[['TFC_per_capita']]
-        overwrite_countries = list(overwrite_TFC_df.index)
-        for country in overwrite_countries:
-            if overwrite_TFC_df.at[country, 'TFC_per_capita'] > 0:
-                TFC_df.at[country, 'TFC_per_capita'] = overwrite_TFC_df.at[country, 'TFC_per_capita']
+        if country_overwrite is not None:
+            overwrite_TFC_df = pd.read_csv(country_overwrite, index_col=0)[['TFC_per_capita']]
+            overwrite_countries = list(overwrite_TFC_df.index)
+            for country in overwrite_countries:
+                if country == 'BGD':
+                    breakpoint()
+                if overwrite_TFC_df.at[country, 'TFC_per_capita'] > 0:
+                    TFC_df.at[country, 'TFC_per_capita'] = overwrite_TFC_df.at[country, 'TFC_per_capita']
     # Get sector-specific TFC with sectoral share
     df_sector_TFC = df_sector_TFC_share.mul(TFC_df['TFC_per_capita'], axis=0)
     # Calculate the electrified parts
@@ -112,5 +115,5 @@ if __name__ == "__main__":
         elec_loss_rate=snakemake.input.elec_loss_rate,
         hydro_nuclear_prod=snakemake.input.hydro_nuclear_prod,
         tot_per_capita_TFC=snakemake.params.tot_per_capita_TFC,
-        country_overwrite=snakemake.input.country_overwrite,
+        country_overwrite=snakemake.params.country_overwrite,
     )
