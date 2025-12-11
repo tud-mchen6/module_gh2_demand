@@ -11,7 +11,7 @@ homepage = "https://clio.readthedocs.io/"
 [dependencies]
 clio-tools = ">=2025.03.03"
 conda = ">=25.0.0"
-ipdb = ">=0.13.13,<0.14"
+ipdb = ">=0.13.13"
 ipykernel = ">=6.29.5"
 jsonschema = ">=4.0.0"
 mypy = ">=1.15.0"
@@ -20,10 +20,6 @@ python = ">=3.12"
 ruff = ">=0.9.9"
 snakefmt = ">=0.10.2"
 snakemake-minimal = ">=8.29.0"
-pandas = ">=2.3.3,<3"
-requests = ">=2.32.5,<3"
-matplotlib = ">=3.10.8,<4"
-graphviz = ">=14.0.4,<15"
 
 [tasks]
 test-integration = {cmd = "pytest tests/clio_test.py"}
