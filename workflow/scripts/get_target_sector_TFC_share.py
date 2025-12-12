@@ -76,6 +76,7 @@ def get_target_sector_TFC_share(
                 if overwrite_TFC_df.at[country, 'TFC_per_capita'] > 0:
                     TFC_df.at[country, 'TFC_per_capita'] = overwrite_TFC_df.at[country, 'TFC_per_capita']
         for country in TFC_df.index:
+            # Assume the threshold for adjusting sectoral share is 70 GJ/year/capita; could be changed to a config parameter if needed
             if TFC_df.at[country, 'TFC_per_capita'] > 70:
                 res_ter_share = target_df.at[country, 'RESIDENT'] + target_df.at[country, 'COMMPUB']
                 if res_ter_share > 0.4:
