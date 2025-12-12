@@ -63,8 +63,6 @@ def calculate_vRES_demand(output_dir : str, output_file : str,
             overwrite_TFC_df = pd.read_csv(country_overwrite, index_col=0)[['TFC_per_capita']]
             overwrite_countries = list(overwrite_TFC_df.index)
             for country in overwrite_countries:
-                if country == 'BGD':
-                    breakpoint()
                 if overwrite_TFC_df.at[country, 'TFC_per_capita'] > 0:
                     TFC_df.at[country, 'TFC_per_capita'] = overwrite_TFC_df.at[country, 'TFC_per_capita']
     # Get sector-specific TFC with sectoral share
