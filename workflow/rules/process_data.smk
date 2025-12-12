@@ -39,6 +39,8 @@ rule get_historical_sector_TFC_share:
     params:
         countries=requested_countries,
         output_dir="resources/processed/"
+    conda:
+        "../envs/default.yaml"
     script:
         "../scripts/get_historical_TFC_bySector.py"
 
@@ -57,6 +59,8 @@ rule get_historical_sector_electrification:
     params:
         countries=requested_countries,
         output_dir="resources/processed/"
+    conda:
+        "../envs/default.yaml"
     script:
         "../scripts/get_historical_electrification_bySector.py"
 
@@ -73,6 +77,8 @@ rule get_historical_elec_decarb:
         countries=requested_countries,
         output_dir="resources/processed/",
         year=year
+    conda:
+        "../envs/default.yaml"
     script:
         "../scripts/get_historical_elec_decarb.py"
 
@@ -89,6 +95,8 @@ rule get_historical_heat_decarb:
         countries=requested_countries,
         output_dir="resources/processed/",
         year=year
+    conda:
+        "../envs/default.yaml"
     script:
         "../scripts/get_historical_heat_decarb.py"
 
@@ -109,6 +117,8 @@ rule get_historical_non_elec_decarb:
         countries=requested_countries,
         output_dir="resources/processed/",
         year=year
+    conda:
+        "../envs/default.yaml"
     script:
         "../scripts/get_historical_non_elec_decarb.py"
 
@@ -128,6 +138,8 @@ rule get_historical_hydro_nuclear_prod:
         countries=requested_countries,
         output_dir="resources/processed/",
         year=year
+    conda:
+        "../envs/default.yaml"
     script:
         "../scripts/get_historical_hydro_nuclear_prod.py"
 
@@ -144,6 +156,8 @@ rule get_population:
     params:
         population_ref_year=lambda wildcards: wildcards.year,
         output_dir="resources/processed/",
+    conda:
+        "../envs/default.yaml"
     script:
         "../scripts/get_population.py"
 
@@ -162,6 +176,8 @@ rule get_historical_per_capita_TFC:
         output_file="resources/processed/historical_per_capita_TFC_{year}.csv",
     params:
         output_dir="resources/processed/",
+    conda:
+        "../envs/default.yaml"
     script:
         "../scripts/get_historical_per_capita_TFC.py"
 
@@ -178,5 +194,7 @@ rule get_historical_elec_TnD_loss_rate:
         output_file="resources/processed/IEA_historical_elec_TnD_loss_rate_{year}.csv",
     params:
         output_dir="resources/processed/",
+    conda:
+        "../envs/default.yaml"
     script:
         "../scripts/get_historical_elec_TnD_loss_rate.py"

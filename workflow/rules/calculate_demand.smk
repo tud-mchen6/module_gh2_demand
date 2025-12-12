@@ -34,6 +34,8 @@ rule get_target_sector_TFC_share:
         reference_sector_TFC_share=lambda wc: (
             f"resources/processed/IEA_historical_sector_TFC_share_{ref_year}.csv"
         )
+    conda:
+        "../envs/default.yaml"
     output:
         output_file="resources/prepare/target_sector_TFC_share_{scenario_name}.csv"
     script:
