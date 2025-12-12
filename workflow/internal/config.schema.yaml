@@ -28,7 +28,7 @@ properties:
       type: float
       minimum: 0.1
     elec_rate_in_case_zero:
-      description: The change rate assumed in case the reference value is zero.
+      description: The electrification rate assumed in case the reference value is zero.
       type: float
       maximum: 1
     historical_elec_rate:
@@ -39,7 +39,7 @@ properties:
       type: float
       minimum: 0.1
     elec_decarb_in_case_zero: 
-      description: The change rate assumed in case the reference value is zero.
+      description: The electricity decarbonisation level assumed in case the reference value is zero.
       type: float
       maximum: 1
     historical_elec_decarb:
@@ -50,7 +50,7 @@ properties:
       type: float
       minimum: 0.1
     non_elec_decarb_in_case_zero: 
-      description: The change rate assumed in case the reference value is zero.
+      description: The non-electricity decarbonisation level in case the reference value is zero.
       type: float
       maximum: 1
     historical_non_elec_decarb:
