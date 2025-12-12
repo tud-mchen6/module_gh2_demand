@@ -9,6 +9,9 @@ def get_target_sector_TFC_share(
         sector_overwrite_dir : str,
         reference_sector_TFC_share : str,
         output_file : str,
+        use_historical_per_capita_TFC: bool,
+        tot_per_capita_TFC: float,
+        country_overwrite: str = None,
 ):
     """
     Get the target sectoral share in total final consumption for each country,
@@ -25,6 +28,9 @@ def get_target_sector_TFC_share(
     - reference_sector_TFC_share: str - Path to the sectoral share of the
         reference year.
     - output_file: str - Path to save the output file.
+    - use_historical_per_capita_TFC: bool - Whether to use historical values of per 
+        capita total final consumption for each country.
+    - country_overwrite: str - User-given overwrites of country-specific data.
     """
 
     # Get the historical reference values
@@ -59,9 +65,33 @@ def get_target_sector_TFC_share(
                     print("Input error: given country not present in analysed countries.")
     target_df = target_df.sort_index().round(4)
 
+    # If TFC per person exceeds a certain threshold, cap the share of residential + tertiary
+    if not use_historical_per_capita_TFC:
+        TFC_df = pd.DataFrame({'TFC_per_capita':tot_per_capita_TFC}, index=target_df.index)
+        # Check if any country-specific input is defined by user
+        if country_overwrite is not None:
+            overwrite_TFC_df = pd.read_csv(country_overwrite, index_col=0)[['TFC_per_capita']]
+            overwrite_countries = list(overwrite_TFC_df.index)
+            for country in overwrite_countries:
+                if overwrite_TFC_df.at[country, 'TFC_per_capita'] > 0:
+                    TFC_df.at[country, 'TFC_per_capita'] = overwrite_TFC_df.at[country, 'TFC_per_capita']
+        for country in TFC_df.index:
+            if TFC_df.at[country, 'TFC_per_capita'] > 70:
+                res_ter_share = target_df.at[country, 'RESIDENT'] + target_df.at[country, 'COMMPUB']
+                if res_ter_share > 0.4:
+                    scaling_factor = 0.4 / res_ter_share
+                    target_df.at[country, 'RESIDENT'] *= scaling_factor
+                    target_df.at[country, 'COMMPUB'] *= scaling_factor
+                    # Re-normalise the other sectors
+                    other_sectors = target_df.columns.difference(['RESIDENT', 'COMMPUB'])
+                    other_sum = target_df.loc[country, other_sectors].sum()
+                    for sector in other_sectors:
+                        target_df.at[country, sector] = target_df.at[country, sector] / other_sum * (1 - 0.4)
+        
 
 
     # Output the file
+    target_df = target_df.round(4)
     target_df.to_csv(output_file)
 
 
@@ -71,5 +101,8 @@ if __name__ == "__main__":
         use_historical=snakemake.params.use_historical,
         sector_overwrite_dir=snakemake.params.sector_overwrite_dir,
         reference_sector_TFC_share=snakemake.input.reference_sector_TFC_share,
-        output_file=snakemake.output.output_file
+        output_file=snakemake.output.output_file,
+        use_historical_per_capita_TFC=snakemake.params.use_historical_per_capita_TFC,
+        tot_per_capita_TFC=snakemake.params.tot_per_capita_TFC,
+        country_overwrite=snakemake.params.country_overwrite,
     )

@@ -30,6 +30,9 @@ rule get_target_sector_TFC_share:
         sector_overwrite_dir="resources/user/sector_level_overwrite",
         scenario_name=scenario_name,
         use_historical=config["required"]["historical_sector_TFC_share"],
+        country_overwrite=lambda wc: "resources/user/country_level_overwrite.csv" if os.path.exists("resources/user/country_level_overwrite.csv") else None,
+        use_historical_per_capita_TFC=config["required"]["historical_per_capita_TFC"],
+        tot_per_capita_TFC=config["required"]["tot_per_capita_TFC"],
     input:
         reference_sector_TFC_share=lambda wc: (
             f"resources/processed/IEA_historical_sector_TFC_share_{ref_year}.csv"
