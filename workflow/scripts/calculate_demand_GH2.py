@@ -9,6 +9,7 @@ def calculate_GH2_demand(output_dir : str, output_file : str,
                           sector_TFC_share: str, sector_electrification : str, 
                           sector_non_elec_decarb : str, population: str,
                           tot_per_capita_TFC: float,
+                          hist_non_elec_renew_consum: str,
                           country_overwrite: str = None,
                           ):
     
@@ -35,6 +36,8 @@ def calculate_GH2_demand(output_dir : str, output_file : str,
     - population: str - Path the the population file used in the calculation.
     - tot_per_capita_TFC: float - User-given universal default per capita total final energy
         consumption for all countries. Given in config. Unit: GJ/year/capita.
+    - hist_non_elec_renew_consum: str - Path to the historical non-electricity renewable
+        energy consumption data.
     - country_overwrite: str - User-given overwrites of country-specific data, specifically
         TFC per capita for this script.
     """
@@ -68,6 +71,12 @@ def calculate_GH2_demand(output_dir : str, output_file : str,
     population = pd.read_csv(population, index_col=0)
     population = population.loc[population.index.intersection(df_decarb_non_elec.index)]
     df_decarb_non_elec_tot = df_decarb_non_elec.sum(axis=1) * population[population.columns[0]] * 1e-3 # switch from GJ to TJ
+    # Subtract historical bio-waste consumption
+    hist_non_elec_renew_consum_df = pd.read_csv(hist_non_elec_renew_consum, index_col=0)
+    df_decarb_non_elec_tot = df_decarb_non_elec_tot.sub(hist_non_elec_renew_consum_df['NON_ELEC_RENEW_CONSUM'], fill_value=0)
+    # In case existing bio-waste consumption is higher than the calculated non-elec decarb demand, no need for further demand
+    breakpoint()
+    df_decarb_non_elec_tot[df_decarb_non_elec_tot < 0] = 0
     df_GH2_demand = df_decarb_non_elec_tot.to_frame(name='GH2_DEMAND')
     df_GH2_demand['UNIT'] = 'TJ/year'
 
@@ -75,6 +84,7 @@ def calculate_GH2_demand(output_dir : str, output_file : str,
     # Create the output directory if not existing
     os.makedirs(output_dir, exist_ok=True)
     # Export the final df
+    df_GH2_demand = df_GH2_demand.round(4)
     df_GH2_demand.to_csv(output_file)
 
 
@@ -91,5 +101,6 @@ if __name__ == "__main__":
         sector_non_elec_decarb=snakemake.input.sector_non_elec_decarb,
         population=snakemake.input.population,
         tot_per_capita_TFC=snakemake.params.tot_per_capita_TFC,
+        hist_non_elec_renew_consum=snakemake.input.hist_non_elec_renew_consum,
         country_overwrite=snakemake.params.country_overwrite,
     )

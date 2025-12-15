@@ -183,6 +183,7 @@ rule calculate_GH2_demand:
         sector_electrification="resources/prepare/target_sector_elec_rate_{scenario_name}.csv",
         sector_non_elec_decarb="resources/prepare/target_non_elec_decarb_{scenario_name}.csv",
         population="resources/processed/population_{population_ref_year}.csv",
+        hist_non_elec_renew_consum=lambda wc: (f"resources/processed/IEA_historical_non_elec_renew_consum_{ref_year}.csv"),
     conda:
         "../envs/default.yaml"
     output:

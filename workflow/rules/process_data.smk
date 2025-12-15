@@ -144,6 +144,27 @@ rule get_historical_hydro_nuclear_prod:
         "../scripts/get_historical_hydro_nuclear_prod.py"
 
 
+rule get_historical_non_elec_renew_consum:
+    message:
+        """
+        Get real-world non-electricity final consumption, including biomass, waste, and other renewables,
+        for {params.countries} from IEA energy balances by carrier data for year {year}.
+        """
+    input:
+        expand("resources/automatic/IEA_energy_balances/IEA_EnergyBalance_{country}_{year}.csv", 
+        country=requested_countries, year=year),
+    output:
+        output_file="resources/processed/IEA_historical_non_elec_renew_consum_{year}.csv"
+    params:
+        countries=requested_countries,
+        output_dir="resources/processed/",
+        year=year
+    conda:
+        "../envs/default.yaml"
+    script:
+        "../scripts/get_historical_non_elec_renew_consum.py"
+
+
 rule get_population:
     message:
         """
