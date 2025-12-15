@@ -50,3 +50,4 @@ There might be conda environment issues when running this workflow on Windows. R
 - Make it compatible to countries that have no data input in IEA
 - Make the population rule compatible to other scenarios than Medium
 - Possibly use percentages of the existing biomass usage to discount part of the hydrogen demand
+- The IEA industry final energy consumption for Gabon is simply wrong. Need to cross-check with EIA data; if IEA data exceeds the number of EIA, that should probably be rescaled or manually corrected in the rules.
