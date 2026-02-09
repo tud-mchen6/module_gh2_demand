@@ -75,7 +75,6 @@ def calculate_GH2_demand(output_dir : str, output_file : str,
     hist_non_elec_renew_consum_df = pd.read_csv(hist_non_elec_renew_consum, index_col=0)
     df_decarb_non_elec_tot = df_decarb_non_elec_tot.sub(hist_non_elec_renew_consum_df['NON_ELEC_RENEW_CONSUM'], fill_value=0)
     # In case existing bio-waste consumption is higher than the calculated non-elec decarb demand, no need for further demand
-    breakpoint()
     df_decarb_non_elec_tot[df_decarb_non_elec_tot < 0] = 0
     df_GH2_demand = df_decarb_non_elec_tot.to_frame(name='GH2_DEMAND')
     df_GH2_demand['UNIT'] = 'TJ/year'

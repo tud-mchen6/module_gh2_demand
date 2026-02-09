@@ -28,7 +28,7 @@ If the rule to run does not contain wildcards, the user can also just specify th
 
 
 ### Structure of the module
-![Rules of this workflow](rulegraph.pdf)
+![Rules of this workflow](../rulegraph.pdf)
 There are two outputs of this workflow: electricity needed to be produced by vRES and green hydrogen needed to be produced (assuming hydrogen are all produced by electrolysis powered by vRES). Both are presented as a yearly aggregated value; no time series are included.
 
 The rules are classified into three types and are defined in three `.smk` files: `automatic`, `process_data`, and `calculate_demand`.
