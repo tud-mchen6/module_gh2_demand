@@ -69,6 +69,7 @@ rule get_historical_elec_decarb:
     message:
         "Calculate real-world electricity decarbonisation level, for {params.countries} from IEA energy balances."
     input:
+        # The heat balance file contains data for both electricity and heat
         expand("resources/automatic/IEA_elec_heat_balances/IEA_elec_heat_balances_{country}_{year}.csv", 
         country=requested_countries, year=year)
     output:
@@ -123,17 +124,17 @@ rule get_historical_non_elec_decarb:
         "../scripts/get_historical_non_elec_decarb.py"
 
 
-rule get_historical_hydro_nuclear_prod:
+rule get_historical_other_renewables_prod:
     message:
         """
-        Get real-world hydro and nuclear electricity production, for {params.countries} from 
+        Get real-world other renewables electricity production such as hydro and nuclear, for {params.countries} from 
         IEA electricity balances by carrier data for year {year}.
         """
     input:
         expand("resources/automatic/IEA_elec_heat_balances/IEA_elec_heat_balances_{country}_{year}.csv", 
         country=requested_countries, year=year),
     output:
-        output_file="resources/processed/IEA_historical_hydro_nuclear_prod_{year}.csv"
+        output_file="resources/processed/IEA_historical_other_renewables_prod_{year}.csv"
     params:
         countries=requested_countries,
         output_dir="resources/processed/",
@@ -141,7 +142,7 @@ rule get_historical_hydro_nuclear_prod:
     conda:
         "../envs/default.yaml"
     script:
-        "../scripts/get_historical_hydro_nuclear_prod.py"
+        "../scripts/get_historical_other_renewables_prod.py"
 
 
 rule get_historical_non_elec_renew_consum:

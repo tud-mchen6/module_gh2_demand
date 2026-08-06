@@ -154,8 +154,8 @@ rule calculate_vRES_demand:
         sector_electrification="resources/prepare/target_sector_elec_rate_{scenario_name}.csv",
         sector_elec_decarb="resources/prepare/target_elec_decarb_{scenario_name}.csv",
         elec_loss_rate=lambda wc: (f"resources/processed/IEA_historical_elec_TnD_loss_rate_{ref_year}.csv"),
-        hydro_nuclear_prod=lambda wc: (
-            f"resources/processed/IEA_historical_hydro_nuclear_prod_{ref_year}.csv"),
+        other_renewables=lambda wc: (
+            f"resources/processed/IEA_historical_other_renewables_prod_{ref_year}.csv"),
         population="resources/processed/population_{population_ref_year}.csv",
     conda:
         "../envs/default.yaml"
