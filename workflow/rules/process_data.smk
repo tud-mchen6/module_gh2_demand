@@ -152,8 +152,9 @@ rule get_historical_non_elec_renew_consum:
         for {params.countries} from IEA energy balances by carrier data for year {year}.
         """
     input:
-        expand("resources/automatic/IEA_energy_balances/IEA_EnergyBalance_{country}_{year}.csv", 
+        inputs=expand("resources/automatic/IEA_energy_balances/IEA_EnergyBalance_{country}_{year}.csv", 
         country=requested_countries, year=year),
+        heat_decarb="resources/processed/IEA_historical_heat_decarb_{year}.csv",
     output:
         output_file="resources/processed/IEA_historical_non_elec_renew_consum_{year}.csv"
     params:
