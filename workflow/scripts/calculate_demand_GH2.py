@@ -3,18 +3,22 @@ import os
 
 # test
 
-def calculate_GH2_demand(output_dir : str, output_file : str, 
-                         use_historical_per_capita_TFC : bool,
-                         historical_per_capita_TFC : str,
-                          sector_TFC_share: str, sector_electrification : str, 
-                          sector_non_elec_decarb : str, population: str,
-                          tot_per_capita_TFC: float,
-                          hist_non_elec_renew_consum: str,
-                          country_overwrite: str = None,
-                          ):
-    
+
+def calculate_GH2_demand(
+    output_dir: str,
+    output_file: str,
+    use_historical_per_capita_TFC: bool,
+    historical_per_capita_TFC: str,
+    sector_TFC_share: str,
+    sector_electrification: str,
+    sector_non_elec_decarb: str,
+    population: str,
+    tot_per_capita_TFC: float,
+    hist_non_elec_renew_consum: str,
+    country_overwrite: str = None,
+):
     """
-    Calculate the electricity demand of a country that needs to be met by the 
+    Calculate the electricity demand of a country that needs to be met by the
     production of variable renewable energy sources. Given the top-down approach.
     If needed, processed IEA data can be used for reference.
 
@@ -23,7 +27,7 @@ def calculate_GH2_demand(output_dir : str, output_file : str,
     Parameters:
     - output_dir: str - Path of the directory to save the target file.
     - output_file: str - Path to save the processed one CSV file.
-    - use_historical_per_capita_TFC: bool - Whether to use historical values of per 
+    - use_historical_per_capita_TFC: bool - Whether to use historical values of per
         capita total final consumption for each country.
     - historical_per_capita_TFC: str - Path to the historical values of per capita TFC
         in case needed.
@@ -31,7 +35,7 @@ def calculate_GH2_demand(output_dir : str, output_file : str,
         each country.
     - sector_electrification: str - Target electrification rate for each sector in each
         country.
-    - sector_non_elec_decarb: str - Target decarbonisation level of the non-electrified part in 
+    - sector_non_elec_decarb: str - Target decarbonisation level of the non-electrified part in
         each sector in each country.
     - population: str - Path the the population file used in the calculation.
     - tot_per_capita_TFC: float - User-given universal default per capita total final energy
@@ -51,16 +55,20 @@ def calculate_GH2_demand(output_dir : str, output_file : str,
     if use_historical_per_capita_TFC:
         TFC_df = pd.read_csv(historical_per_capita_TFC, index_col=0)
     else:
-        TFC_df = pd.DataFrame({'TFC_per_capita':tot_per_capita_TFC}, index=frame.index)
+        TFC_df = pd.DataFrame({"TFC_per_capita": tot_per_capita_TFC}, index=frame.index)
         # Check if any country-specific input is defined by user
         if country_overwrite is not None:
-            overwrite_TFC_df = pd.read_csv(country_overwrite, index_col=0)[['TFC_per_capita']]
+            overwrite_TFC_df = pd.read_csv(country_overwrite, index_col=0)[
+                ["TFC_per_capita"]
+            ]
             overwrite_countries = list(overwrite_TFC_df.index)
             for country in overwrite_countries:
-                if overwrite_TFC_df.at[country, 'TFC_per_capita'] > 0:
-                    TFC_df.at[country, 'TFC_per_capita'] = overwrite_TFC_df.at[country, 'TFC_per_capita']
+                if overwrite_TFC_df.at[country, "TFC_per_capita"] > 0:
+                    TFC_df.at[country, "TFC_per_capita"] = overwrite_TFC_df.at[
+                        country, "TFC_per_capita"
+                    ]
     # Get the sectoral TFC from the share
-    df_sector_TFC = df_sector_TFC_share.mul(TFC_df['TFC_per_capita'], axis=0)
+    df_sector_TFC = df_sector_TFC_share.mul(TFC_df["TFC_per_capita"], axis=0)
     # Calculate the electrified parts
     elec_rate = pd.read_csv(sector_electrification, index_col=0)
     df_non_elec = df_sector_TFC * (1 - elec_rate)
@@ -70,23 +78,23 @@ def calculate_GH2_demand(output_dir : str, output_file : str,
     # Get population
     population = pd.read_csv(population, index_col=0)
     population = population.loc[population.index.intersection(df_decarb_non_elec.index)]
-    df_decarb_non_elec_tot = df_decarb_non_elec.sum(axis=1) * population[population.columns[0]] * 1e-3 # switch from GJ to TJ
-    # Subtract historical bio-waste consumption
+    df_decarb_non_elec_tot = (
+        df_decarb_non_elec.sum(axis=1) * population[population.columns[0]] * 1e-3
+    )  # switch from GJ to TJ
+    # Subtract historical bio-waste consumption on TFC level
     hist_non_elec_renew_consum_df = pd.read_csv(hist_non_elec_renew_consum, index_col=0)
-    df_decarb_non_elec_tot = df_decarb_non_elec_tot.sub(hist_non_elec_renew_consum_df['NON_ELEC_RENEW_CONSUM'], fill_value=0)
+    df_decarb_non_elec_tot = df_decarb_non_elec_tot.sub(
+        hist_non_elec_renew_consum_df["NON_ELEC_RENEW_CONSUM"], fill_value=0
+    )
     # In case existing bio-waste consumption is higher than the calculated non-elec decarb demand, no need for further demand
     df_decarb_non_elec_tot[df_decarb_non_elec_tot < 0] = 0
-    df_GH2_demand = df_decarb_non_elec_tot.to_frame(name='GH2_DEMAND')
-    df_GH2_demand['UNIT'] = 'TJ/year'
-
-
+    df_GH2_demand = df_decarb_non_elec_tot.to_frame(name="GH2_DEMAND")
+    df_GH2_demand["UNIT"] = "TJ/year"
     # Create the output directory if not existing
     os.makedirs(output_dir, exist_ok=True)
     # Export the final df
     df_GH2_demand = df_GH2_demand.round(4)
     df_GH2_demand.to_csv(output_file)
-
-
 
 
 if __name__ == "__main__":
