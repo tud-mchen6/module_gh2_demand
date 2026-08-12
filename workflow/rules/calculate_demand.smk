@@ -18,6 +18,30 @@ ref_year = config.get("year_for_IEA_balance", []) or 2023
 population_ref_year = config["required"]["population_ref_year"]
 
 
+rule get_target_TFC_per_capita:
+    message:
+        """
+        Prepare for the demand calculation by getting the target total final consumption
+        per capita for each country.
+        """
+    params:
+        countries=config.get("countries", []) or available_countries,
+        country_overwrite=lambda wc: "resources/user/country_level_overwrite.csv" if os.path.exists("resources/user/country_level_overwrite.csv") else None,
+        scenario_name=scenario_name,
+        use_historical=config["required"]["historical_per_capita_TFC"],
+        tot_per_capita_TFC=config["required"]["tot_per_capita_TFC"],
+    input:
+        reference_per_capita_TFC=lambda wc: (
+            f"resources/processed/historical_per_capita_TFC_{ref_year}.csv"
+        )
+    conda:
+        "../envs/default.yaml"
+    output:
+        output_file="resources/prepare/target_per_capita_TFC_{scenario_name}.csv"
+    script:
+        "../scripts/get_target_TFC_per_capita.py"
+
+
 rule get_target_sector_TFC_share:
     message:
         """
@@ -31,11 +55,13 @@ rule get_target_sector_TFC_share:
         scenario_name=scenario_name,
         use_historical=config["required"]["historical_sector_TFC_share"],
         country_overwrite=lambda wc: "resources/user/country_level_overwrite.csv" if os.path.exists("resources/user/country_level_overwrite.csv") else None,
-        use_historical_per_capita_TFC=config["required"]["historical_per_capita_TFC"],
-        tot_per_capita_TFC=config["required"]["tot_per_capita_TFC"],
     input:
+        TFC_per_capita="resources/prepare/target_per_capita_TFC_{scenario_name}.csv",
         reference_sector_TFC_share=lambda wc: (
             f"resources/processed/IEA_historical_sector_TFC_share_{ref_year}.csv"
+        ),
+        reference_per_capita_TFC=lambda wc: (
+            f"resources/processed/historical_per_capita_TFC_{ref_year}.csv"
         )
     conda:
         "../envs/default.yaml"
@@ -143,13 +169,9 @@ rule calculate_vRES_demand:
         """
     params:
         output_dir="results/demand/",
-        tot_per_capita_TFC=config["required"]["tot_per_capita_TFC"],
         country_overwrite=lambda wc: "resources/user/country_level_overwrite.csv" if os.path.exists("resources/user/country_level_overwrite.csv") else None,
-        use_historical_per_capita_TFC=config["required"]["historical_per_capita_TFC"],
-        ref_year=ref_year,
     input:
-        historical_per_capita_TFC=lambda wc: (
-            f"resources/processed/historical_per_capita_TFC_{ref_year}.csv"),
+        TFC_per_capita="resources/prepare/target_per_capita_TFC_{scenario_name}.csv",
         sector_TFC_share="resources/prepare/target_sector_TFC_share_{scenario_name}.csv",
         sector_electrification="resources/prepare/target_sector_elec_rate_{scenario_name}.csv",
         sector_elec_decarb="resources/prepare/target_elec_decarb_{scenario_name}.csv",
