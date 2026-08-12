@@ -47,8 +47,7 @@ These downloaded data are mostly historical data, i.e., how the energy system ha
 There might be conda environment issues when running this workflow on Windows. Recommend running it in other systems, such as Linux.
 
 ### TODO lists
-- Add a cap on residential TFC per capita. Otherwise, the residential TFC per capital will be too high if total TFC is scaled up for countries with little industrial TFC.
-- For 2050 scenarios, change the existing mechanism of multiplication rate to addition for decarbonisation rate and electrification rate, so that the speed of decarbonisation is a bit more equal between countries.
 - Make it compatible to countries that have no data input in IEA
 - Make the population rule compatible to other scenarios than Medium
 - The IEA industry final energy consumption for Gabon is simply wrong. Need to cross-check with EIA data; if IEA data exceeds the number of EIA, that should probably be rescaled or manually corrected in the rules.
+- Unify the naming: 'reference' or 'historical'?

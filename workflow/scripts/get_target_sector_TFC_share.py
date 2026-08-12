@@ -4,14 +4,14 @@ import os
 
 
 def get_target_sector_TFC_share(
-        countries : list, 
-        use_historical : bool,
-        sector_overwrite_dir : str,
-        reference_sector_TFC_share : str,
-        output_file : str,
-        use_historical_per_capita_TFC: bool,
-        tot_per_capita_TFC: float,
-        country_overwrite: str = None,
+    countries: list,
+    use_historical: bool,
+    sector_overwrite_dir: str,
+    historical_per_capita_TFC: str,
+    reference_sector_TFC_share: str,
+    output_file: str,
+    TFC_per_capita: str,
+    country_overwrite: str,
 ):
     """
     Get the target sectoral share in total final consumption for each country,
@@ -21,15 +21,15 @@ def get_target_sector_TFC_share(
 
     Parameters:
     - countries: list - List of country codes to process, given in ISO3 codes.
-    - use_historical: bool - Whether to directly use historical values in the 
+    - use_historical: bool - Whether to directly use historical values in the
         reference year.
     - sector_overwrite_dir: str - Path of the directory to store any user-given
         overwrite files.
+    - historical_per_capita_TFC: str - Path to the historical values of per capita TFC.
     - reference_sector_TFC_share: str - Path to the sectoral share of the
         reference year.
     - output_file: str - Path to save the output file.
-    - use_historical_per_capita_TFC: bool - Whether to use historical values of per 
-        capita total final consumption for each country.
+    - TFC_per_capita: str - Path to the target per capita total final consumption data.
     - country_overwrite: str - User-given overwrites of country-specific data.
     """
 
@@ -39,57 +39,105 @@ def get_target_sector_TFC_share(
 
     if not use_historical:
         # Get all the files in the user folder (no template)
-        all_files = glob.glob(os.path.join(sector_overwrite_dir,"*.csv"))
+        all_files = glob.glob(os.path.join(sector_overwrite_dir, "*.csv"))
         for file in all_files:
             # Only get the ones with the naming convention; hard-coded
-            file_name = file.replace(sector_overwrite_dir, "").replace(".csv","").replace("\\","")
-            if 'sectorShare' in file_name:
+            file_name = (
+                file.replace(sector_overwrite_dir, "")
+                .replace(".csv", "")
+                .replace("\\", "")
+            )
+            if "sectorShare" in file_name:
                 country = file_name.split("_")[-1]
                 # Only get the ones where country is within the countries list
                 if country in countries:
-                    country_overwrite = pd.read_csv(file,index_col=0)
+                    country_overwrite = pd.read_csv(file, index_col=0)
                     # Check if the value that the user gives is coherent. If not,
                     # use the reference values instead
-                    if 'sector_share' in country_overwrite:
-                        if country_overwrite['sector_share'].sum() == 1:
+                    if "sector_share" in country_overwrite:
+                        if country_overwrite["sector_share"].sum() == 1:
                             target_df = target_df.drop(index=country)
-                            target_df = pd.concat([target_df, country_overwrite['sector_share'].to_frame().
-                                            rename(columns={'sector_share':country}).T])
+                            target_df = pd.concat(
+                                [
+                                    target_df,
+                                    country_overwrite["sector_share"]
+                                    .to_frame()
+                                    .rename(columns={"sector_share": country})
+                                    .T,
+                                ]
+                            )
                         else:
                             print("Input error: sector share not adding up to 1.")
                     else:
                         print("Input error: sector share not defined in user inputs.")
-                elif country=="template":
+                elif country == "template":
                     continue
                 else:
-                    print("Input error: given country not present in analysed countries.")
+                    print(
+                        "Input error: given country not present in analysed countries."
+                    )
     target_df = target_df.sort_index().round(4)
 
-    # If TFC per person exceeds a certain threshold, cap the share of residential + tertiary
-    if not use_historical_per_capita_TFC:
-        TFC_df = pd.DataFrame({'TFC_per_capita':tot_per_capita_TFC}, index=target_df.index)
-        # Check if any country-specific input is defined by user
-        if country_overwrite is not None:
-            overwrite_TFC_df = pd.read_csv(country_overwrite, index_col=0)[['TFC_per_capita']]
-            overwrite_countries = list(overwrite_TFC_df.index)
-            for country in overwrite_countries:
-                if overwrite_TFC_df.at[country, 'TFC_per_capita'] > 0:
-                    TFC_df.at[country, 'TFC_per_capita'] = overwrite_TFC_df.at[country, 'TFC_per_capita']
-        for country in TFC_df.index:
-            # Assume the threshold for adjusting sectoral share is 70 GJ/year/capita; could be changed to a config parameter if needed
-            if TFC_df.at[country, 'TFC_per_capita'] > 70:
-                res_ter_share = target_df.at[country, 'RESIDENT'] + target_df.at[country, 'COMMPUB']
-                if res_ter_share > 0.4:
-                    scaling_factor = 0.4 / res_ter_share
-                    target_df.at[country, 'RESIDENT'] *= scaling_factor
-                    target_df.at[country, 'COMMPUB'] *= scaling_factor
-                    # Re-normalise the other sectors
-                    other_sectors = target_df.columns.difference(['RESIDENT', 'COMMPUB'])
-                    other_sum = target_df.loc[country, other_sectors].sum()
-                    for sector in other_sectors:
-                        target_df.at[country, sector] = target_df.at[country, sector] / other_sum * (1 - 0.4)
-        
-
+    # Cap the residential and commercial/public TFC based on current day highest level of the world
+    # But also for countries whose TFC is scaling down, set a minimum level of TFC for residential and commercial/public
+    # Get the current TFC per capita for countries
+    TFC_df = pd.read_csv(TFC_per_capita, index_col=0)
+    TFC_per_sector = target_df.mul(TFC_df["TFC_per_capita"], axis=0)
+    historical_TFC = pd.read_csv(historical_per_capita_TFC, index_col=0)
+    hist_TFC_per_sector = reference_df.mul(historical_TFC["TFC_per_capita"], axis=0)
+    # assume 0.9 quantile cutoff to avoid outliers. 0.9 quantile should be sufficient for decent living
+    remaining_sectors_limited = ["TOTTRANS", "AGRICULT", "FISHING"]
+    remaining_sectors_unlimited = ["TOTIND", "NONENUSE", "ONONSPEC"]
+    dict_max_TFC = {}
+    dict_min_TFC = {}
+    for sector in [remaining_sectors_limited, "RESIDENT", "COMMPUB"]:
+        if isinstance(sector, list):
+            for s in sector:
+                dict_max_TFC[s] = hist_TFC_per_sector[s].quantile(0.9)
+        else:
+            dict_max_TFC[sector] = hist_TFC_per_sector[sector].quantile(0.9)
+            dict_min_TFC[sector] = hist_TFC_per_sector[sector].quantile(0.5)
+    for country in TFC_df.index:
+        excess = 0
+        deficit = 0
+        if TFC_per_sector.at[country, "RESIDENT"] > dict_max_TFC["RESIDENT"]:
+            excess += TFC_per_sector.at[country, "RESIDENT"] - dict_max_TFC["RESIDENT"]
+            TFC_per_sector.at[country, "RESIDENT"] = dict_max_TFC["RESIDENT"]
+        if TFC_per_sector.at[country, "RESIDENT"] < dict_min_TFC["RESIDENT"]:
+            deficit += dict_min_TFC["RESIDENT"] - TFC_per_sector.at[country, "RESIDENT"]
+            TFC_per_sector.at[country, "RESIDENT"] = dict_min_TFC["RESIDENT"]
+        if TFC_per_sector.at[country, "COMMPUB"] > dict_max_TFC["COMMPUB"]:
+            excess += TFC_per_sector.at[country, "COMMPUB"] - dict_max_TFC["COMMPUB"]
+            TFC_per_sector.at[country, "COMMPUB"] = dict_max_TFC["COMMPUB"]
+        else:
+            remaining_sectors_limited.append("COMMPUB")
+        if TFC_per_sector.at[country, "COMMPUB"] < dict_min_TFC["COMMPUB"]:
+            deficit += dict_min_TFC["COMMPUB"] - TFC_per_sector.at[country, "COMMPUB"]
+            TFC_per_sector.at[country, "COMMPUB"] = dict_min_TFC["COMMPUB"]
+        # Re-distribute the other sectors. Assume industry, non-energy use and non
+        # specified can increase withouout limit, but everything else is capped.
+        excess_per_sector = excess / len(
+            remaining_sectors_limited + remaining_sectors_unlimited
+        )
+        additional_excess = 0
+        for sector in remaining_sectors_limited:
+            if (TFC_per_sector.at[country, sector] + excess_per_sector) > dict_max_TFC[
+                sector
+            ]:
+                additional_excess += (
+                    TFC_per_sector.at[country, sector] + excess_per_sector
+                ) - dict_max_TFC[sector]
+                TFC_per_sector.at[country, sector] = dict_max_TFC[sector]
+            else:
+                TFC_per_sector.at[country, sector] += excess_per_sector
+        for sector in remaining_sectors_unlimited:
+            TFC_per_sector.at[country, sector] += (
+                excess_per_sector + additional_excess / len(remaining_sectors_unlimited)
+            )
+            TFC_per_sector.at[country, sector] -= deficit / len(
+                remaining_sectors_unlimited
+            )
+    target_df = TFC_per_sector.div(TFC_df["TFC_per_capita"], axis=0)
 
     # Output the file
     target_df = target_df.round(4)
@@ -101,9 +149,9 @@ if __name__ == "__main__":
         countries=snakemake.params.countries,
         use_historical=snakemake.params.use_historical,
         sector_overwrite_dir=snakemake.params.sector_overwrite_dir,
+        historical_per_capita_TFC=snakemake.input.reference_per_capita_TFC,
         reference_sector_TFC_share=snakemake.input.reference_sector_TFC_share,
         output_file=snakemake.output.output_file,
-        use_historical_per_capita_TFC=snakemake.params.use_historical_per_capita_TFC,
-        tot_per_capita_TFC=snakemake.params.tot_per_capita_TFC,
+        TFC_per_capita=snakemake.input.TFC_per_capita,
         country_overwrite=snakemake.params.country_overwrite,
     )
