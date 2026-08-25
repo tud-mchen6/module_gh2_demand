@@ -32,13 +32,13 @@ rule get_historical_sector_TFC_share:
         for {params.countries} from IEA energy balances, in year {year}.
         """
     input:
-        expand("resources/automatic/IEA_energy_balances/IEA_EnergyBalance_{country}_{year}.csv", 
+        expand("<resources>/automatic/IEA_energy_balances/IEA_EnergyBalance_{country}_{year}.csv", 
         country=requested_countries, year=year)
     output:
-        output_file="resources/processed/IEA_historical_sector_TFC_share_{year}.csv"
+        output_file="<resources>/processed/IEA_historical_sector_TFC_share_{year}.csv"
     params:
         countries=requested_countries,
-        output_dir="resources/processed/"
+        output_dir="<resources>/processed/"
     conda:
         "../envs/default.yaml"
     script:
@@ -52,13 +52,13 @@ rule get_historical_sector_electrification:
         from IEA energy balances, in year {year}.
         """
     input:
-        expand("resources/automatic/IEA_energy_balances/IEA_EnergyBalance_{country}_{year}.csv", 
+        expand("<resources>/automatic/IEA_energy_balances/IEA_EnergyBalance_{country}_{year}.csv", 
         country=requested_countries, year=year)
     output:
-        output_file="resources/processed/IEA_historical_sector_electrification_{year}.csv"
+        output_file="<resources>/processed/IEA_historical_sector_electrification_{year}.csv"
     params:
         countries=requested_countries,
-        output_dir="resources/processed/"
+        output_dir="<resources>/processed/"
     conda:
         "../envs/default.yaml"
     script:
@@ -70,13 +70,13 @@ rule get_historical_elec_decarb:
         "Calculate real-world electricity decarbonisation level, for {params.countries} from IEA energy balances."
     input:
         # The heat balance file contains data for both electricity and heat
-        expand("resources/automatic/IEA_elec_heat_balances/IEA_elec_heat_balances_{country}_{year}.csv", 
+        expand("<resources>/automatic/IEA_elec_heat_balances/IEA_elec_heat_balances_{country}_{year}.csv", 
         country=requested_countries, year=year)
     output:
-        output_file="resources/processed/IEA_historical_elec_decarb_{year}.csv"
+        output_file="<resources>/processed/IEA_historical_elec_decarb_{year}.csv"
     params:
         countries=requested_countries,
-        output_dir="resources/processed/",
+        output_dir="<resources>/processed/",
         year=year
     conda:
         "../envs/default.yaml"
@@ -88,13 +88,13 @@ rule get_historical_heat_decarb:
     message:
         "Calculate real-world heat decarbonisation level, for {params.countries} from IEA heat balances."
     input:
-        expand("resources/automatic/IEA_elec_heat_balances/IEA_elec_heat_balances_{country}_{year}.csv", 
+        expand("<resources>/automatic/IEA_elec_heat_balances/IEA_elec_heat_balances_{country}_{year}.csv", 
         country=requested_countries, year=year)
     output:
-        output_file="resources/processed/IEA_historical_heat_decarb_{year}.csv"
+        output_file="<resources>/processed/IEA_historical_heat_decarb_{year}.csv"
     params:
         countries=requested_countries,
-        output_dir="resources/processed/",
+        output_dir="<resources>/processed/",
         year=year
     conda:
         "../envs/default.yaml"
@@ -109,14 +109,14 @@ rule get_historical_non_elec_decarb:
         from IEA energy balances.
         """
     input:
-        expand("resources/automatic/IEA_energy_balances/IEA_EnergyBalance_{country}_{year}.csv", 
+        expand("<resources>/automatic/IEA_energy_balances/IEA_EnergyBalance_{country}_{year}.csv", 
         country=requested_countries, year=year),
-        heat_decarb="resources/processed/IEA_historical_heat_decarb_{year}.csv"
+        heat_decarb="<resources>/processed/IEA_historical_heat_decarb_{year}.csv"
     output:
-        output_file="resources/processed/IEA_historical_non_elec_decarb_{year}.csv"
+        output_file="<resources>/processed/IEA_historical_non_elec_decarb_{year}.csv"
     params:
         countries=requested_countries,
-        output_dir="resources/processed/",
+        output_dir="<resources>/processed/",
         year=year
     conda:
         "../envs/default.yaml"
@@ -131,13 +131,13 @@ rule get_historical_other_renewables_prod:
         IEA electricity balances by carrier data for year {year}.
         """
     input:
-        expand("resources/automatic/IEA_elec_heat_balances/IEA_elec_heat_balances_{country}_{year}.csv", 
+        expand("<resources>/automatic/IEA_elec_heat_balances/IEA_elec_heat_balances_{country}_{year}.csv", 
         country=requested_countries, year=year),
     output:
-        output_file="resources/processed/IEA_historical_other_renewables_prod_{year}.csv"
+        output_file="<resources>/processed/IEA_historical_other_renewables_prod_{year}.csv"
     params:
         countries=requested_countries,
-        output_dir="resources/processed/",
+        output_dir="<resources>/processed/",
         year=year
     conda:
         "../envs/default.yaml"
@@ -152,14 +152,14 @@ rule get_historical_non_elec_renew_consum:
         for {params.countries} from IEA energy balances by carrier data for year {year}.
         """
     input:
-        inputs=expand("resources/automatic/IEA_energy_balances/IEA_EnergyBalance_{country}_{year}.csv", 
+        inputs=expand("<resources>/automatic/IEA_energy_balances/IEA_EnergyBalance_{country}_{year}.csv", 
         country=requested_countries, year=year),
-        heat_decarb="resources/processed/IEA_historical_heat_decarb_{year}.csv",
+        heat_decarb="<resources>/processed/IEA_historical_heat_decarb_{year}.csv",
     output:
-        output_file="resources/processed/IEA_historical_non_elec_renew_consum_{year}.csv"
+        output_file="<resources>/processed/IEA_historical_non_elec_renew_consum_{year}.csv"
     params:
         countries=requested_countries,
-        output_dir="resources/processed/",
+        output_dir="<resources>/processed/",
         year=year
     conda:
         "../envs/default.yaml"
@@ -175,10 +175,10 @@ rule get_population:
     input:
         population_file=lambda wc: (f"resources/automatic/WPP_population/WPP_population_{population_scenario}.csv"),
     output:
-        population_output="resources/processed/population_{year}.csv",
+        population_output="<resources>/processed/population_{year}.csv",
     params:
         population_ref_year=lambda wildcards: wildcards.year,
-        output_dir="resources/processed/",
+        output_dir="<resources>/processed/",
     conda:
         "../envs/default.yaml"
     script:
@@ -192,13 +192,13 @@ rule get_historical_per_capita_TFC:
         in each country.
         """
     input:
-        inputs=expand("resources/automatic/IEA_energy_balances/IEA_EnergyBalance_{country}_{year}.csv", 
+        inputs=expand("<resources>/automatic/IEA_energy_balances/IEA_EnergyBalance_{country}_{year}.csv", 
         country=requested_countries, year=year),
-        population_input="resources/processed/population_{year}.csv",
+        population_input="<resources>/processed/population_{year}.csv",
     output:
-        output_file="resources/processed/historical_per_capita_TFC_{year}.csv",
+        output_file="<resources>/processed/historical_per_capita_TFC_{year}.csv",
     params:
-        output_dir="resources/processed/",
+        output_dir="<resources>/processed/",
     conda:
         "../envs/default.yaml"
     script:
@@ -211,12 +211,12 @@ rule get_historical_elec_TnD_loss_rate:
         Calculate the transmission & distribution loss rates of each country based on historical data.
         """
     input:
-        inputs=expand("resources/automatic/IEA_elec_heat_balances/IEA_elec_heat_balances_{country}_{year}.csv", 
+        inputs=expand("<resources>/automatic/IEA_elec_heat_balances/IEA_elec_heat_balances_{country}_{year}.csv", 
         country=requested_countries, year=year),
     output:
-        output_file="resources/processed/IEA_historical_elec_TnD_loss_rate_{year}.csv",
+        output_file="<resources>/processed/IEA_historical_elec_TnD_loss_rate_{year}.csv",
     params:
-        output_dir="resources/processed/",
+        output_dir="<resources>/processed/",
     conda:
         "../envs/default.yaml"
     script:

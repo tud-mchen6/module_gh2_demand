@@ -2,7 +2,16 @@ import yaml
 
 from snakemake.utils import min_version, validate
 
-min_version("8.10")
+min_version("9.19")
+
+
+# !!!!! IMPORTANT !!!!!
+# Define pathvars for all user resource files and result files
+# This allows users to re-wire how the module is used in their workflow with ease.
+pathvars:
+    resources="resources",
+    results="results",
+    logs="logs",
 
 
 # Load the example configuration. This will be overridden by users.
@@ -33,11 +42,14 @@ population_ref_year = config["required"]["population_ref_year"]
 
 rule all:
     message:
-        "Generate both demand files as given."
-    input:
-        vRES_demand=expand("results/demand/demand_vRES_{population_ref_year}_{scenario_name}.csv",
-            population_ref_year=population_ref_year, scenario_name=scenario_name),
-        GH2_demand=expand("results/demand/demand_GH2_{population_ref_year}_{scenario_name}.csv",
-            population_ref_year=population_ref_year, scenario_name=scenario_name),
+        "ERROR: Invalid `rule all:` call"
     default_target: True
+    output:
+        "INVALID",
+    log:
+        stderr="<logs>/all.stderr",
+    conda:
+        "envs/module.yaml"
+    shell:
+        'echo "This workflow must be called as a snakemake module." > {log.stderr}'
 

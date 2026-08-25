@@ -20,12 +20,12 @@ rule download_balances_IEA:
     message:
         "Download the Energy Balances file per country of year {year} from IEA."
     params:
-        output_dir="resources/automatic/IEA_energy_balances/",
+        output_dir="<resources>/automatic/IEA_energy_balances/",
         year=year
     input:
         country_codes_file="workflow/internal/country_codes.csv",
     output:
-        expand("resources/automatic/IEA_energy_balances/IEA_EnergyBalance_{country}_{year}.csv",
+        expand("<resources>/automatic/IEA_energy_balances/IEA_EnergyBalance_{country}_{year}.csv",
             country=requested_countries, year=year)
     conda:
         "../envs/shell.yaml"
@@ -45,12 +45,12 @@ rule download_elec_heat_balances_IEA:
         such as coal.
         """
     params:
-        output_dir="resources/automatic/IEA_elec_heat_balances/",
+        output_dir="<resources>/automatic/IEA_elec_heat_balances/",
         year=year
     input:
         country_codes_file="workflow/internal/country_codes.csv",
     output:
-        expand("resources/automatic/IEA_elec_heat_balances/IEA_elec_heat_balances_{country}_{year}.csv",
+        expand("<resources>/automatic/IEA_elec_heat_balances/IEA_elec_heat_balances_{country}_{year}.csv",
             country=requested_countries, year=year)
     conda:
         "../envs/shell.yaml"
@@ -66,10 +66,10 @@ rule download_population_WPP:
         and perform slight processing on scenario and years.
         """
     params:
-        output_path="resources/automatic/WPP_population/",
+        output_path="<resources>/automatic/WPP_population/",
         population_scenario=population_scenario,
     output:
-        output_file="resources/automatic/WPP_population/WPP_population_{population_scenario}.csv"
+        output_file="<resources>/automatic/WPP_population/WPP_population_{population_scenario}.csv"
         # touch("resources/automatic/WPP_population/download_complete.flag")
     script:
         "../scripts/download_population_WPP.py"
