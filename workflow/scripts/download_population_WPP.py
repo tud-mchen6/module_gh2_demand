@@ -1,10 +1,11 @@
 import pandas as pd
 import os
 
-def download_WPP_population(output_path: str, population_scenario : str = 'Medium'):
+
+def download_WPP_population(output_file: str, population_scenario: str = "Medium"):
     """
-    Downloads the United Nations World Population Prospects data and saves it as a CSV file. 
-    
+    Downloads the United Nations World Population Prospects data and saves it as a CSV file.
+
     Unit: thousands of persons.
 
     Parameters:
@@ -14,29 +15,39 @@ def download_WPP_population(output_path: str, population_scenario : str = 'Mediu
     """
 
     URL = "https://population.un.org/wpp/assets/Excel%20Files/1_Indicator%20(Standard)/CSV_FILES/WPP2024_TotalPopulationBySex.csv.gz"
-    df = pd.read_csv(URL, compression='gzip')
+    df = pd.read_csv(URL, compression="gzip")
 
     # Hard-code the needed rows by us
-    needed_rows = ['ISO3_code','ISO2_code','Location','Variant', 'Time', 'LocTypeName','PopTotal','PopDensity']
+    needed_rows = [
+        "ISO3_code",
+        "ISO2_code",
+        "Location",
+        "Variant",
+        "Time",
+        "LocTypeName",
+        "PopTotal",
+        "PopDensity",
+    ]
     df = df[needed_rows]
     # Select only countries, not regions
-    country_csv = df[df['ISO3_code'].notna()]
+    country_csv = df[df["ISO3_code"].notna()]
     # Hard-code the relevant years defined by us
     years = [2020, 2023, 2024, 2025, 2030, 2035, 2040, 2045, 2050]
-    country_csv_years = country_csv[country_csv['Time'].isin(years)]
+    country_csv_years = country_csv[country_csv["Time"].isin(years)]
 
     # Select only the scenario defined by us
-    country_csv_scenario = country_csv_years[country_csv_years['Variant'] == population_scenario]
+    country_csv_scenario = country_csv_years[
+        country_csv_years["Variant"] == population_scenario
+    ]
     # Save to csv
     # Create the folder to keep the original csvs
+    output_path = output_file.split("WPP_population/")[0]
     os.makedirs(output_path, exist_ok=True)
-    file_name = f'WPP_population_{population_scenario}.csv'
-    country_csv_scenario.to_csv(output_path + file_name, index=False)
-
+    country_csv_scenario.to_csv(output_file, index=False)
 
 
 if __name__ == "__main__":
     download_WPP_population(
-        output_path=snakemake.params.output_path,
-        population_scenario=snakemake.params.population_scenario
+        output_file=snakemake.output.output_file,
+        population_scenario=snakemake.params.population_scenario,
     )
