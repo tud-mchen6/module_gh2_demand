@@ -12,7 +12,7 @@ population_scenario = config["required"]["population_scenario"]
 
 rule download_balances_IEA:
     message:
-        "Download the Energy Balances file per country of year {year} from IEA."
+        "Download the Energy Balances file per country of year {params.year} from IEA."
     params:
         year=year
     input:
@@ -29,7 +29,7 @@ rule download_balances_IEA:
 rule download_elec_heat_balances_IEA:
     message:
         """
-        Download the electricity and heat balance file per country for year {year} until latest from IEA.
+        Download the electricity and heat balance file per country for year {params.year} until latest from IEA.
 
         This dataset includes electricity generated from all sources, already accounting for the 
         generation efficiencies. The data given in energy balances with 'Electricity plants', 
@@ -39,7 +39,6 @@ rule download_elec_heat_balances_IEA:
     params:
         year=year
     input:
-        # country_codes_file="workflow/internal/country_codes.csv",
         country_codes_file=workflow.source_path("../internal/country_codes.csv"),
     output:
         output_dir=directory("<resources>/automatic/IEA_elec_heat_balances/"),
