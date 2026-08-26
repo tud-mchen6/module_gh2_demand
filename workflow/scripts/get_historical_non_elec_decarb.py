@@ -5,12 +5,7 @@ from io import StringIO
 
 
 def process_countries_non_elec_decarb(
-    inputs: str,
-    countries,
-    heat_decarb: str,
-    output_dir: str,
-    output_file: str,
-    year: int = 2023,
+    inputs: str, countries, heat_decarb: str, output_file: str, year: int = 2023
 ):
     """
     Processes IEA energy balance CSV files for specified countries to calculate decarbonisation
@@ -22,7 +17,6 @@ def process_countries_non_elec_decarb(
     - inputs: A collection of paths to the directory containing country-level IEA energy balance CSV files.
     - countries: list - List of country codes to process, given in ISO3 codes.
     - heat_decarb: str - Path to the processed heat decarbonisation level CSV file.
-    - output_dir: str - Directory to save the processed one CSV file.
     - output_file: str - Path to save the processed one CSV file.
     - year: int - The year to process the data for.
 
@@ -122,6 +116,7 @@ def process_countries_non_elec_decarb(
     df_all = df_all.fillna(0).round(4)
 
     # Create the folder to keep the processed csv
+    output_dir = output_file.split("IEA")[0]
     os.makedirs(output_dir, exist_ok=True)
     df_all.to_csv(output_file)
 
@@ -131,7 +126,6 @@ if __name__ == "__main__":
         inputs=list(snakemake.input),
         countries=snakemake.params.countries,
         heat_decarb=snakemake.input.heat_decarb,
-        output_dir=snakemake.params.output_dir,
         output_file=snakemake.output.output_file,
         year=snakemake.params.year,
     )

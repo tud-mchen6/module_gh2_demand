@@ -3,12 +3,7 @@ import os
 
 
 def get_countries_non_elec_renew_consum(
-    inputs: str,
-    heat_decarb: str,
-    countries,
-    output_dir: str,
-    output_file: str,
-    year: int,
+    inputs: str, heat_decarb: str, countries, output_file: str, year: int
 ):
     """
     Processes IEA energy balance CSV files for specified countries to extract non-electricity renewable energy
@@ -18,7 +13,6 @@ def get_countries_non_elec_renew_consum(
     - inputs: A collection of paths to the directory containing country-level IEA energy balance CSV files.
     - heat_decarb: Path to the heat decarbonization rate file.
     - countries: list - List of country codes to process, given in ISO3 codes.
-    - output_dir: str - Path of the directory to save the target file.
     - output_file: str - Path to save the processed one CSV file.
     - year: int - The year to get production data from.
 
@@ -63,6 +57,7 @@ def get_countries_non_elec_renew_consum(
     df_all = df_all.round(4)
 
     # Create the folder to keep the processed csv
+    output_dir = output_file.split("IEA")[0]
     os.makedirs(output_dir, exist_ok=True)
     df_all.to_csv(output_file, index=False)
 
@@ -72,7 +67,6 @@ if __name__ == "__main__":
         inputs=snakemake.input.inputs,
         heat_decarb=snakemake.input.heat_decarb,
         countries=snakemake.params.countries,
-        output_dir=snakemake.params.output_dir,
         output_file=snakemake.output.output_file,
         year=snakemake.params.year,
     )

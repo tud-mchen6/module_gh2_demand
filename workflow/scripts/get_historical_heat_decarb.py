@@ -13,7 +13,7 @@ def safe_read_csv(path):
 
 
 def process_countries_heat_decarb(
-    inputs: str, countries, output_dir: str, output_file: str, year: int = 2023
+    inputs: str, countries, output_file: str, year: int = 2023
 ):
     """
     Processes IEA electricity and heat balance CSV files for specified countries to calculate decarbonisation
@@ -97,6 +97,7 @@ def process_countries_heat_decarb(
     df_all = df_all.round(4)
 
     # Create the folder to keep the processed csv
+    output_dir = output_file.split("IEA")[0]
     os.makedirs(output_dir, exist_ok=True)
     df_all.to_csv(output_file, index=False)
 
@@ -105,7 +106,6 @@ if __name__ == "__main__":
     process_countries_heat_decarb(
         inputs=list(snakemake.input),
         countries=snakemake.params.countries,
-        output_dir=snakemake.params.output_dir,
         output_file=snakemake.output.output_file,
         year=snakemake.params.year,
     )

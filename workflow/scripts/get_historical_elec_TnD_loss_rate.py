@@ -3,7 +3,7 @@ import glob
 import os
 
 
-def get_elec_TnD_loss_rate(inputs: str, output_dir: str, output_file: str):
+def get_elec_TnD_loss_rate(inputs: str, output_file: str):
     """
     Calculate the transmission & distribution loss rates of each country from the
     electricity balance data.
@@ -13,7 +13,6 @@ def get_elec_TnD_loss_rate(inputs: str, output_dir: str, output_file: str):
 
     Parameters:
     - inputs: str - Paths to the energy balances country-specific CSV files.
-    - output_dir: str - Path to save the calculated CSV file.
     - output_file: str - Path of the final output file.
 
     Unit of data: GWh, but the output is dimensionless
@@ -52,13 +51,12 @@ def get_elec_TnD_loss_rate(inputs: str, output_dir: str, output_file: str):
         else:
             dict_all["ELEC_LOSS_RATE"].append(0)
 
+    output_dir = output_file.split("IEA")[0]
     os.makedirs(output_dir, exist_ok=True)
     pd.DataFrame.from_dict(dict_all).to_csv(output_file, index=False)
 
 
 if __name__ == "__main__":
     get_elec_TnD_loss_rate(
-        inputs=snakemake.input.inputs,
-        output_dir=snakemake.params.output_dir,
-        output_file=snakemake.output.output_file,
+        inputs=snakemake.input.inputs, output_file=snakemake.output.output_file
     )
