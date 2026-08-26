@@ -196,11 +196,9 @@ rule calculate_GH2_demand:
         output_dir="<results>/demand/",
         tot_per_capita_TFC=config["required"]["tot_per_capita_TFC"],
         use_historical_per_capita_TFC=config["required"]["historical_per_capita_TFC"],
-        country_overwrite=lambda wc: "<resources>/user/country_level_overwrite.csv" if os.path.exists("<resources>/user/country_level_overwrite.csv") else None,
         ref_year=ref_year,
     input:
-        historical_per_capita_TFC=lambda wc: (
-            f"<resources>/processed/historical_per_capita_TFC_{ref_year}.csv"),
+        TFC_per_capita="<resources>/prepare/target_per_capita_TFC_{scenario_name}.csv",
         sector_TFC_share="<resources>/prepare/target_sector_TFC_share_{scenario_name}.csv",
         sector_electrification="<resources>/prepare/target_sector_elec_rate_{scenario_name}.csv",
         sector_non_elec_decarb="<resources>/prepare/target_non_elec_decarb_{scenario_name}.csv",
