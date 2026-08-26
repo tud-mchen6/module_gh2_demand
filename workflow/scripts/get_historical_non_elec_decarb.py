@@ -2,10 +2,11 @@ import pandas as pd
 import requests
 import os
 from io import StringIO
+from pathlib import Path
 
 
 def process_countries_non_elec_decarb(
-    inputs: str, countries, heat_decarb: str, output_file: str, year: int = 2023
+    input_dir: str, countries, heat_decarb: str, output_file: str, year
 ):
     """
     Processes IEA energy balance CSV files for specified countries to calculate decarbonisation
@@ -14,7 +15,7 @@ def process_countries_non_elec_decarb(
     Unit of data: TJ
 
     Parameters:
-    - inputs: A collection of paths to the directory containing country-level IEA energy balance CSV files.
+    - input_dir: Directory to extract all the downloaded files.
     - countries: list - List of country codes to process, given in ISO3 codes.
     - heat_decarb: str - Path to the processed heat decarbonisation level CSV file.
     - output_file: str - Path to save the processed one CSV file.
@@ -49,65 +50,69 @@ def process_countries_non_elec_decarb(
     df_all = pd.DataFrame(columns=["ISO3"] + list_sectors)
 
     # Iterate over countries
-    for country, file_path in zip(countries, inputs):
-        df = pd.read_csv(file_path)
-        df_year = df[df["year"] == year]
-        # Iterate over sectors
-        flows = df_year["flow"].unique()
-        for sector in list_sectors:
-            if sector not in flows:
-                continue
-            df_sector_non_elec = df_year[
-                (df_year["flow"] == sector)
-                & ~(df_year["product"].isin(["ELECTR", "TOTAL"]))
-            ]
-            # Overcome data bugs in the API: double entry for 'Oil and oil products' and 'Oil products'.
-            # Therefore, if the data values are the same for both carriers, they are seen as one carrier only.
-            if ("MTOTOIL" in df_sector_non_elec["product"].unique()) & (
-                "TOTPRODS" in df_sector_non_elec["product"].unique()
-            ):
-                if (
-                    df_sector_non_elec[df_sector_non_elec["product"] == "MTOTOIL"][
-                        "value"
-                    ].values[0]
-                    == df_sector_non_elec[df_sector_non_elec["product"] == "TOTPRODS"][
-                        "value"
-                    ].values[0]
+    input_path = Path(input_dir)
+    files = [str(file) for file in input_path.iterdir() if file.is_file()]
+    for file in files:
+        if (str(year) in file) & (file.split("_")[-2] in countries):
+            country = file.split("_")[-2]
+            df = pd.read_csv(file)
+            df_year = df[df["year"] == year]
+            # Iterate over sectors
+            flows = df_year["flow"].unique()
+            for sector in list_sectors:
+                if sector not in flows:
+                    continue
+                df_sector_non_elec = df_year[
+                    (df_year["flow"] == sector)
+                    & ~(df_year["product"].isin(["ELECTR", "TOTAL"]))
+                ]
+                # Overcome data bugs in the API: double entry for 'Oil and oil products' and 'Oil products'.
+                # Therefore, if the data values are the same for both carriers, they are seen as one carrier only.
+                if ("MTOTOIL" in df_sector_non_elec["product"].unique()) & (
+                    "TOTPRODS" in df_sector_non_elec["product"].unique()
                 ):
-                    df_sector_non_elec.loc[
-                        df_sector_non_elec["product"] == "MTOTOIL", "value"
-                    ] = 0
-            # Calculate total TFC that is not electricity
-            sector_tot_TFC = df_sector_non_elec["value"].sum()
-            # Calculate the decarbonised TFC: non-carbon carriers + decarbonised heat
-            nonCarb_TFC = 0
-            # Non-carbon non-electricity carriers
-            for carrier in list_nonCarb_nonElec_carriers:
-                if carrier in df_sector_non_elec["product"].values:
-                    nonCarb_TFC += df_sector_non_elec[
-                        df_sector_non_elec["product"] == carrier
-                    ]["value"].values[0]
-            # If heat is present, apply the decarbonisation level
-            if "HEAT" in df_sector_non_elec["product"].values:
-                if (
-                    df_heat_decarb[df_heat_decarb["ISO3"] == country][
-                        "HEAT_DECARB"
-                    ].values[0]
-                    > 0
-                ):
-                    heat_decarb_level = df_heat_decarb[
-                        df_heat_decarb["ISO3"] == country
-                    ]["HEAT_DECARB"].values[0]
-                    nonCarb_TFC += (
-                        df_sector_non_elec[df_sector_non_elec["product"] == "HEAT"][
+                    if (
+                        df_sector_non_elec[df_sector_non_elec["product"] == "MTOTOIL"][
                             "value"
                         ].values[0]
-                        * heat_decarb_level
-                    )
-            df_all.loc[country, sector] = (
-                nonCarb_TFC / sector_tot_TFC if sector_tot_TFC > 0 else 0
-            )
-        df_all.loc[country, "ISO3"] = country
+                        == df_sector_non_elec[
+                            df_sector_non_elec["product"] == "TOTPRODS"
+                        ]["value"].values[0]
+                    ):
+                        df_sector_non_elec.loc[
+                            df_sector_non_elec["product"] == "MTOTOIL", "value"
+                        ] = 0
+                # Calculate total TFC that is not electricity
+                sector_tot_TFC = df_sector_non_elec["value"].sum()
+                # Calculate the decarbonised TFC: non-carbon carriers + decarbonised heat
+                nonCarb_TFC = 0
+                # Non-carbon non-electricity carriers
+                for carrier in list_nonCarb_nonElec_carriers:
+                    if carrier in df_sector_non_elec["product"].values:
+                        nonCarb_TFC += df_sector_non_elec[
+                            df_sector_non_elec["product"] == carrier
+                        ]["value"].values[0]
+                # If heat is present, apply the decarbonisation level
+                if "HEAT" in df_sector_non_elec["product"].values:
+                    if (
+                        df_heat_decarb[df_heat_decarb["ISO3"] == country][
+                            "HEAT_DECARB"
+                        ].values[0]
+                        > 0
+                    ):
+                        heat_decarb_level = df_heat_decarb[
+                            df_heat_decarb["ISO3"] == country
+                        ]["HEAT_DECARB"].values[0]
+                        nonCarb_TFC += (
+                            df_sector_non_elec[df_sector_non_elec["product"] == "HEAT"][
+                                "value"
+                            ].values[0]
+                            * heat_decarb_level
+                        )
+                df_all.loc[country, sector] = (
+                    nonCarb_TFC / sector_tot_TFC if sector_tot_TFC > 0 else 0
+                )
+            df_all.loc[country, "ISO3"] = country
 
     # Do some cleaning
     # Move the country code to the front of the dataframe
@@ -123,7 +128,7 @@ def process_countries_non_elec_decarb(
 
 if __name__ == "__main__":
     process_countries_non_elec_decarb(
-        inputs=list(snakemake.input),
+        input_dir=snakemake.input.input_dir,
         countries=snakemake.params.countries,
         heat_decarb=snakemake.input.heat_decarb,
         output_file=snakemake.output.output_file,

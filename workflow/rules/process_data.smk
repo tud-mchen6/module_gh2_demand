@@ -23,13 +23,13 @@ rule get_historical_sector_TFC_share:
         Get real-world total final energy consumption broken down by sector, 
         for {params.countries} from IEA energy balances, in year {year}.
         """
-    input:
-        expand("<resources>/automatic/IEA_energy_balances/IEA_EnergyBalance_{country}_{year}.csv", 
-        country=requested_countries, year=year)
-    output:
-        output_file="<resources>/processed/IEA_historical_sector_TFC_share_{year}.csv"
     params:
         countries=requested_countries,
+        year=year,    
+    input:
+        input_dir="<resources>/automatic/IEA_energy_balances/",
+    output:
+        output_file="<resources>/processed/IEA_historical_sector_TFC_share_{year}.csv"
     conda:
         "../envs/default.yaml"
     script:
@@ -42,13 +42,13 @@ rule get_historical_sector_electrification:
         Calculate real-world electrification rate of each sector, for {params.countries} 
         from IEA energy balances, in year {year}.
         """
-    input:
-        expand("<resources>/automatic/IEA_energy_balances/IEA_EnergyBalance_{country}_{year}.csv", 
-        country=requested_countries, year=year)
-    output:
-        output_file="<resources>/processed/IEA_historical_sector_electrification_{year}.csv"
     params:
         countries=requested_countries,
+        year=year,
+    input:
+        input_dir="<resources>/automatic/IEA_energy_balances/",
+    output:
+        output_file="<resources>/processed/IEA_historical_sector_electrification_{year}.csv"
     conda:
         "../envs/default.yaml"
     script:
@@ -58,15 +58,14 @@ rule get_historical_sector_electrification:
 rule get_historical_elec_decarb:
     message:
         "Calculate real-world electricity decarbonisation level, for {params.countries} from IEA energy balances."
-    input:
-        # The heat balance file contains data for both electricity and heat
-        expand("<resources>/automatic/IEA_elec_heat_balances/IEA_elec_heat_balances_{country}_{year}.csv", 
-        country=requested_countries, year=year)
-    output:
-        output_file="<resources>/processed/IEA_historical_elec_decarb_{year}.csv"
     params:
         countries=requested_countries,
-        year=year
+        year=year,
+    input:
+        # The heat balance file contains data for both electricity and heat
+        input_dir="<resources>/automatic/IEA_elec_heat_balances/",
+    output:
+        output_file="<resources>/processed/IEA_historical_elec_decarb_{year}.csv"
     conda:
         "../envs/default.yaml"
     script:
@@ -76,14 +75,13 @@ rule get_historical_elec_decarb:
 rule get_historical_heat_decarb:
     message:
         "Calculate real-world heat decarbonisation level, for {params.countries} from IEA heat balances."
-    input:
-        expand("<resources>/automatic/IEA_elec_heat_balances/IEA_elec_heat_balances_{country}_{year}.csv", 
-        country=requested_countries, year=year)
-    output:
-        output_file="<resources>/processed/IEA_historical_heat_decarb_{year}.csv"
     params:
         countries=requested_countries,
-        year=year
+        year=year,
+    input:
+        input_dir="<resources>/automatic/IEA_elec_heat_balances/",
+    output:
+        output_file="<resources>/processed/IEA_historical_heat_decarb_{year}.csv"
     conda:
         "../envs/default.yaml"
     script:
@@ -96,15 +94,15 @@ rule get_historical_non_elec_decarb:
         Calculate real-world non-electricity decarbonisation level in each sector, for {params.countries} 
         from IEA energy balances.
         """
+    params:
+        countries=requested_countries,
+        year=year,
     input:
-        expand("<resources>/automatic/IEA_energy_balances/IEA_EnergyBalance_{country}_{year}.csv", 
-        country=requested_countries, year=year),
+        input_dir="<resources>/automatic/IEA_energy_balances/",
         heat_decarb="<resources>/processed/IEA_historical_heat_decarb_{year}.csv"
     output:
         output_file="<resources>/processed/IEA_historical_non_elec_decarb_{year}.csv"
-    params:
-        countries=requested_countries,
-        year=year
+
     conda:
         "../envs/default.yaml"
     script:
@@ -117,14 +115,13 @@ rule get_historical_other_renewables_prod:
         Get real-world other renewables electricity production such as hydro and nuclear, for {params.countries} from 
         IEA electricity balances by carrier data for year {year}.
         """
-    input:
-        expand("<resources>/automatic/IEA_elec_heat_balances/IEA_elec_heat_balances_{country}_{year}.csv", 
-        country=requested_countries, year=year),
-    output:
-        output_file="<resources>/processed/IEA_historical_other_renewables_prod_{year}.csv"
     params:
         countries=requested_countries,
-        year=year
+        year=year,
+    input:
+        input_dir="<resources>/automatic/IEA_elec_heat_balances/",
+    output:
+        output_file="<resources>/processed/IEA_historical_other_renewables_prod_{year}.csv"
     conda:
         "../envs/default.yaml"
     script:
@@ -137,15 +134,15 @@ rule get_historical_non_elec_renew_consum:
         Get real-world non-electricity final consumption, including biomass, waste, and other renewables,
         for {params.countries} from IEA energy balances by carrier data for year {year}.
         """
+    params:
+        countries=requested_countries,
+        year=year,
     input:
-        inputs=expand("<resources>/automatic/IEA_energy_balances/IEA_EnergyBalance_{country}_{year}.csv", 
-        country=requested_countries, year=year),
+        input_dir="<resources>/automatic/IEA_energy_balances/",
         heat_decarb="<resources>/processed/IEA_historical_heat_decarb_{year}.csv",
     output:
         output_file="<resources>/processed/IEA_historical_non_elec_renew_consum_{year}.csv"
-    params:
-        countries=requested_countries,
-        year=year
+
     conda:
         "../envs/default.yaml"
     script:
@@ -176,12 +173,14 @@ rule get_historical_per_capita_TFC:
         Use the population data of the same historical year as TFC data to calculate the per capita TFC
         in each country.
         """
+    params:
+        countries=requested_countries,
+        year=year,
     input:
-        inputs=expand("<resources>/automatic/IEA_energy_balances/IEA_EnergyBalance_{country}_{year}.csv", 
-        country=requested_countries, year=year),
+        input_dir="<resources>/automatic/IEA_energy_balances/",
         population_input="<resources>/processed/population_{year}.csv",
     output:
-        output_file="<resources>/processed/historical_per_capita_TFC_{year}.csv",
+        output_file="<resources>/processed/IEA_historical_per_capita_TFC_{year}.csv",
     conda:
         "../envs/default.yaml"
     script:
@@ -193,9 +192,11 @@ rule get_historical_elec_TnD_loss_rate:
         """
         Calculate the transmission & distribution loss rates of each country based on historical data.
         """
+    params:
+        countries=requested_countries,
+        year=year,
     input:
-        inputs=expand("<resources>/automatic/IEA_elec_heat_balances/IEA_elec_heat_balances_{country}_{year}.csv", 
-        country=requested_countries, year=year),
+        input_dir="<resources>/automatic/IEA_elec_heat_balances/",
     output:
         output_file="<resources>/processed/IEA_historical_elec_TnD_loss_rate_{year}.csv",
     conda:

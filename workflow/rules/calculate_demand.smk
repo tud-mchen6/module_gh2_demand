@@ -33,7 +33,7 @@ rule get_target_TFC_per_capita:
         # TODO: in the integrated workflow, this file needs to be manually put there - write in README
         country_overwrite="<resources>/user/country_level_overwrite.csv",
         reference_per_capita_TFC=lambda wc: (
-            f"<resources>/processed/historical_per_capita_TFC_{ref_year}.csv"
+            f"<resources>/processed/IEA_historical_per_capita_TFC_{ref_year}.csv"
         )
     conda:
         "../envs/default.yaml"
