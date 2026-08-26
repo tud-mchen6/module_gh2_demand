@@ -56,8 +56,6 @@ rule download_population_WPP:
         Download per-country population data from the United Nations World Population Prospects,
         and perform slight processing on scenario and years.
         """
-    params:
-        population_scenario=population_scenario,
     output:
         output_file="<resources>/automatic/WPP_population/WPP_population_{population_scenario}.csv"
         # touch("resources/automatic/WPP_population/download_complete.flag")

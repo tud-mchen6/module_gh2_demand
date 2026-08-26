@@ -2,7 +2,7 @@ import pandas as pd
 import os
 
 
-def download_WPP_population(output_file: str, population_scenario: str = "Medium"):
+def download_WPP_population(output_file: str):
     """
     Downloads the United Nations World Population Prospects data and saves it as a CSV file.
 
@@ -36,6 +36,7 @@ def download_WPP_population(output_file: str, population_scenario: str = "Medium
     country_csv_years = country_csv[country_csv["Time"].isin(years)]
 
     # Select only the scenario defined by us
+    population_scenario = snakemake.wildcards.population_scenario
     country_csv_scenario = country_csv_years[
         country_csv_years["Variant"] == population_scenario
     ]
@@ -47,7 +48,4 @@ def download_WPP_population(output_file: str, population_scenario: str = "Medium
 
 
 if __name__ == "__main__":
-    download_WPP_population(
-        output_file=snakemake.output.output_file,
-        population_scenario=snakemake.params.population_scenario,
-    )
+    download_WPP_population(output_file=snakemake.output.output_file)
