@@ -62,7 +62,7 @@ rule get_target_sector_TFC_share:
             f"<resources>/processed/IEA_historical_sector_TFC_share_{ref_year}.csv"
         ),
         reference_per_capita_TFC=lambda wc: (
-            f"<resources>/processed/historical_per_capita_TFC_{ref_year}.csv"
+            f"<resources>/processed/IEA_historical_per_capita_TFC_{ref_year}.csv"
         )
     conda:
         "../envs/default.yaml"
