@@ -1,8 +1,6 @@
 import pandas as pd
 import os
 
-# test
-
 
 def calculate_GH2_demand(
     output_dir: str,

@@ -155,7 +155,7 @@ rule get_population:
         Given population reference year, get the clean by-country population file for final calculation.
         """
     input:
-        population_file="resources/automatic/WPP_population/WPP_population_{population_scenario}.csv",
+        population_file="<resources>/automatic/WPP_population/WPP_population_{population_scenario}.csv",
     output:
         population_output="<resources>/processed/population_{population_scenario}_{year}.csv",
     params:
