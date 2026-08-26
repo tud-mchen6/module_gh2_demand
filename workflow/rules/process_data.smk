@@ -158,9 +158,9 @@ rule get_population:
         Given population reference year, get the clean by-country population file for final calculation.
         """
     input:
-        population_file=lambda wc: (f"resources/automatic/WPP_population/WPP_population_{population_scenario}.csv"),
+        population_file="resources/automatic/WPP_population/WPP_population_{population_scenario}.csv",
     output:
-        population_output="<resources>/processed/population_{year}.csv",
+        population_output="<resources>/processed/population_{population_scenario}_{year}.csv",
     params:
         population_ref_year=lambda wildcards: wildcards.year,
         output_dir="<resources>/processed/",

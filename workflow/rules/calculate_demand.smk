@@ -177,7 +177,7 @@ rule calculate_vRES_demand:
         elec_loss_rate=lambda wc: (f"<resources>/processed/IEA_historical_elec_TnD_loss_rate_{ref_year}.csv"),
         other_renewables=lambda wc: (
             f"<resources>/processed/IEA_historical_other_renewables_prod_{ref_year}.csv"),
-        population="<resources>/processed/population_{population_ref_year}.csv",
+        population="<resources>/processed/population_{population_scenario}_{population_ref_year}.csv",
     conda:
         "../envs/default.yaml"
     output:
@@ -201,11 +201,11 @@ rule calculate_GH2_demand:
         sector_TFC_share="<resources>/prepare/target_sector_TFC_share_{scenario_name}.csv",
         sector_electrification="<resources>/prepare/target_sector_elec_rate_{scenario_name}.csv",
         sector_non_elec_decarb="<resources>/prepare/target_non_elec_decarb_{scenario_name}.csv",
-        population="<resources>/processed/population_{population_ref_year}.csv",
+        population="<resources>/processed/population_{population_scenario}_{population_ref_year}.csv",
         hist_non_elec_renew_consum=lambda wc: (f"<resources>/processed/IEA_historical_non_elec_renew_consum_{ref_year}.csv"),
     conda:
         "../envs/default.yaml"
     output:
-        output_file="<results>/demand/demand_GH2_{population_ref_year}_{scenario_name}.csv",
+        output_file="<results>/demand/demand_GH2_{population_ref_year}_{population_scenario}_{scenario_name}.csv",
     script:
         "../scripts/calculate_demand_GH2.py"
