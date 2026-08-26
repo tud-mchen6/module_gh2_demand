@@ -178,7 +178,7 @@ rule get_historical_per_capita_TFC:
         year=year,
     input:
         input_dir="<resources>/automatic/IEA_energy_balances/",
-        population_input="<resources>/processed/population_{year}.csv",
+        population_input="<resources>/processed/population_{population_scenario}_{year}.csv",
     output:
         output_file="<resources>/processed/IEA_historical_per_capita_TFC_{year}.csv",
     conda:
