@@ -6,22 +6,14 @@ import os
 configfile: "config/config.yaml"
 
 # If default_countries is True, get all available countries from IEA dataset
-if config["required"]["download_default_countries"]:
-    country_codes = pd.read_csv("workflow/internal/country_codes.csv")
-    available_countries = country_codes.loc[country_codes['IEA'].notna(), 'ISO3'].tolist()
-# If config defines specific countries, use those; otherwise use all found ones
-requested_countries = (config.get("optional") or {}).get("countries") or available_countries
+country_codes = pd.read_csv(workflow.source_path("../internal/country_codes.csv"))
+requested_countries = country_codes.loc[country_codes['IEA'].notna(), 'ISO3'].tolist()
 # Default processing year is 2023 unless specified in config
 year = (config.get("optional") or {}).get("year_for_IEA_balance") or 2023
 # The year to create the demand data for. The population of this year will be used
 # to calculate the final demand.
 population_ref_year = config["required"]["population_ref_year"]
 population_scenario = config["required"]["population_scenario"]
-
-# Validate that all requested countries exist
-missing = [c for c in requested_countries if c not in available_countries]
-if missing:
-    sys.exit(f"Error: requested countries not found in workspace: {missing}")
 
 
 
