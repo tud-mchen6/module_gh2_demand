@@ -62,9 +62,6 @@ properties:
     population_scenario:
       description: WPP population projection scenario to use. "Medium" is the one with historical values.
       type: string
-    download_default_countries:
-      description: Whether to download data for all countries available in the IEA dataset.
-      type: boolean
     
 
   

@@ -7,12 +7,6 @@ configfile: "config/config.yaml"
 
 # The year to get energy balance or electricity balance data from IEA
 year = (config.get("optional") or {}).get("year_for_IEA_balance") or 2023
-if not config["required"]["download_default_countries"]:
-    requested_countries = config.get("optional", {}).get("countries")
-else:
-    # If default_countries is True, get all available countries from IEA dataset
-    country_codes = pd.read_csv("workflow/internal/country_codes.csv")
-    requested_countries = country_codes.loc[country_codes['IEA'].notna(), 'ISO3'].tolist()
 population_scenario = config["required"]["population_scenario"]
 
 
@@ -22,7 +16,7 @@ rule download_balances_IEA:
     params:
         year=year
     input:
-        country_codes_file="workflow/internal/country_codes.csv",
+        country_codes_file=workflow.source_path("../internal/country_codes.csv"),
     output:
         output_dir=directory("<resources>/automatic/IEA_energy_balances/"),
     conda:
@@ -45,7 +39,8 @@ rule download_elec_heat_balances_IEA:
     params:
         year=year
     input:
-        country_codes_file="workflow/internal/country_codes.csv",
+        # country_codes_file="workflow/internal/country_codes.csv",
+        country_codes_file=workflow.source_path("../internal/country_codes.csv"),
     output:
         output_dir=directory("<resources>/automatic/IEA_elec_heat_balances/"),
     conda:
