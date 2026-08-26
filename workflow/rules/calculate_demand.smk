@@ -181,7 +181,7 @@ rule calculate_vRES_demand:
     conda:
         "../envs/default.yaml"
     output:
-        output_file="<results>/demand/demand_vRES_{population_ref_year}_{scenario_name}.csv",
+        output_file="<results>/demand/demand_vRES_{population_ref_year}_{population_scenario}_{scenario_name}.csv",
     script:
         "../scripts/calculate_demand_vRES.py"
 
