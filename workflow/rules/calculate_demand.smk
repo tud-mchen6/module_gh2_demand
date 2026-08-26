@@ -26,11 +26,12 @@ rule get_target_TFC_per_capita:
         """
     params:
         countries=config.get("countries", []) or available_countries,
-        country_overwrite=lambda wc: "<resources>/user/country_level_overwrite.csv" if os.path.exists("<resources>/user/country_level_overwrite.csv") else None,
         scenario_name=scenario_name,
         use_historical=config["required"]["historical_per_capita_TFC"],
         tot_per_capita_TFC=config["required"]["tot_per_capita_TFC"],
     input:
+        # TODO: in the integrated workflow, this file needs to be manually put there - write in README
+        country_overwrite="<resources>/user/country_level_overwrite.csv",
         reference_per_capita_TFC=lambda wc: (
             f"<resources>/processed/historical_per_capita_TFC_{ref_year}.csv"
         )
@@ -54,8 +55,8 @@ rule get_target_sector_TFC_share:
         sector_overwrite_dir="<resources>/user/sector_level_overwrite",
         scenario_name=scenario_name,
         use_historical=config["required"]["historical_sector_TFC_share"],
-        country_overwrite=lambda wc: "<resources>/user/country_level_overwrite.csv" if os.path.exists("<resources>/user/country_level_overwrite.csv") else None,
     input:
+        country_overwrite="<resources>/user/country_level_overwrite.csv",
         TFC_per_capita="<resources>/prepare/target_per_capita_TFC_{scenario_name}.csv",
         reference_sector_TFC_share=lambda wc: (
             f"<resources>/processed/IEA_historical_sector_TFC_share_{ref_year}.csv"
@@ -83,14 +84,13 @@ rule get_target_elec_rate_by_sector:
     params:
         countries=config.get("countries", []) or available_countries,
         ref_year=ref_year,
-        # country_overwrite="<resources>/user/country_level_overwrite.csv",
-        country_overwrite=lambda wc: "<resources>/user/country_level_overwrite.csv" if os.path.exists("<resources>/user/country_level_overwrite.csv") else None,
         sector_overwrite_dir="<resources>/user/sector_level_overwrite",
         scenario_name=scenario_name,
         sector_elec_rate_rel=config["required"]["sector_elec_rate_rel"],
         elec_rate_in_case_zero=config["required"]["elec_rate_in_case_zero"],
         use_historical=config["required"]["historical_elec_rate"],
     input:
+        country_overwrite="<resources>/user/country_level_overwrite.csv",
         reference_sector_elec_rate=lambda wc: (
             f"<resources>/processed/IEA_historical_sector_electrification_{ref_year}.csv"
         )
@@ -114,13 +114,13 @@ rule get_target_elec_decarb:
     params:
         countries=config.get("countries", []) or available_countries,
         ref_year=ref_year,
-        country_overwrite=lambda wc: "<resources>/user/country_level_overwrite.csv" if os.path.exists("<resources>/user/country_level_overwrite.csv") else None,
         sector_overwrite_dir="<resources>/user/sector_level_overwrite",
         scenario_name=scenario_name,
         elec_decarb_rel=config["required"]["elec_decarb_rel"],
         elec_decarb_in_case_zero=config["required"]["elec_decarb_in_case_zero"],
         use_historical=config["required"]["historical_elec_decarb"],
     input:
+        country_overwrite="<resources>/user/country_level_overwrite.csv",
         reference_sector_elec_decarb=lambda wc: (
             f"<resources>/processed/IEA_historical_elec_decarb_{ref_year}.csv"
         )
@@ -144,13 +144,13 @@ rule get_target_non_elec_decarb:
     params:
         countries=config.get("countries", []) or available_countries,
         ref_year=ref_year,
-        country_overwrite=lambda wc: "<resources>/user/country_level_overwrite.csv" if os.path.exists("<resources>/user/country_level_overwrite.csv") else None,
         sector_overwrite_dir="<resources>/user/sector_level_overwrite",
         scenario_name=scenario_name,
         non_elec_decarb_rel=config["required"]["non_elec_decarb_rel"],
         non_elec_decarb_in_case_zero=config["required"]["non_elec_decarb_in_case_zero"],
         use_historical=config["required"]["historical_non_elec_decarb"],
     input:
+        country_overwrite="<resources>/user/country_level_overwrite.csv",
         reference_sector_non_elec_decarb=lambda wc: (
             f"<resources>/processed/IEA_historical_non_elec_decarb_{ref_year}.csv"
         )
@@ -169,7 +169,6 @@ rule calculate_vRES_demand:
         """
     params:
         output_dir="<results>/demand/",
-        country_overwrite=lambda wc: "<resources>/user/country_level_overwrite.csv" if os.path.exists("<resources>/user/country_level_overwrite.csv") else None,
     input:
         TFC_per_capita="<resources>/prepare/target_per_capita_TFC_{scenario_name}.csv",
         sector_TFC_share="<resources>/prepare/target_sector_TFC_share_{scenario_name}.csv",

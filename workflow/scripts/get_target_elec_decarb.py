@@ -161,7 +161,7 @@ if __name__ == "__main__":
         elec_decarb_rel=snakemake.params.elec_decarb_rel,
         elec_decarb_in_case_zero=snakemake.params.elec_decarb_in_case_zero,
         sector_overwrite_dir=snakemake.params.sector_overwrite_dir,
-        country_specific_overwrite=snakemake.params.country_overwrite,
+        country_specific_overwrite=snakemake.input.country_overwrite,
         reference_sector_elec_decarb=snakemake.input.reference_sector_elec_decarb,
         output_file=snakemake.output.output_file,
     )

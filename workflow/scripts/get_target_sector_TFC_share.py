@@ -153,5 +153,5 @@ if __name__ == "__main__":
         reference_sector_TFC_share=snakemake.input.reference_sector_TFC_share,
         output_file=snakemake.output.output_file,
         TFC_per_capita=snakemake.input.TFC_per_capita,
-        country_overwrite=snakemake.params.country_overwrite,
+        country_overwrite=snakemake.input.country_overwrite,
     )

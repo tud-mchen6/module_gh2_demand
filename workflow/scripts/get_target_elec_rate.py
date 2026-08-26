@@ -153,5 +153,5 @@ if __name__ == "__main__":
         sector_overwrite_dir=snakemake.params.sector_overwrite_dir,
         reference_sector_elec_rate=snakemake.input.reference_sector_elec_rate,
         output_file=snakemake.output.output_file,
-        country_specific_overwrite=snakemake.params.country_overwrite,
+        country_specific_overwrite=snakemake.input.country_overwrite,
     )
