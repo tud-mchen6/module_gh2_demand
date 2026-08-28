@@ -40,7 +40,7 @@ rule get_historical_sector_electrification:
     message:
         """
         Calculate real-world electrification rate of each sector, for {params.countries} 
-        from IEA energy balances, in year {year}.
+        from IEA energy balances, in year {params.year}.
         """
     params:
         countries=requested_countries,
@@ -113,7 +113,7 @@ rule get_historical_other_renewables_prod:
     message:
         """
         Get real-world other renewables electricity production such as hydro and nuclear, for {params.countries} from 
-        IEA electricity balances by carrier data for year {year}.
+        IEA electricity balances by carrier data for year {params.year}.
         """
     params:
         countries=requested_countries,
@@ -132,7 +132,7 @@ rule get_historical_non_elec_renew_consum:
     message:
         """
         Get real-world non-electricity final consumption, including biomass, waste, and other renewables,
-        for {params.countries} from IEA energy balances by carrier data for year {year}.
+        for {params.countries} from IEA energy balances by carrier data for year {params.year}.
         """
     params:
         countries=requested_countries,
