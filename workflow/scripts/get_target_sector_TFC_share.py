@@ -132,10 +132,14 @@ def get_target_sector_TFC_share(
                 TFC_per_sector.at[country, sector] += excess_per_sector
         for sector in remaining_sectors_unlimited:
             TFC_per_sector.at[country, sector] += (
-                excess_per_sector + additional_excess / len(remaining_sectors_unlimited)
-            )
-            TFC_per_sector.at[country, sector] -= deficit / len(
-                remaining_sectors_unlimited
+                excess_per_sector + additional_excess
+            ) / len(remaining_sectors_unlimited)
+            # The deficit from previous limited sectors need to be taken from the unlimited sectors
+            # But in case the unlimited sectors also don't have enough, set to 0
+            TFC_per_sector.at[country, sector] = max(
+                TFC_per_sector.at[country, sector]
+                - deficit / len(remaining_sectors_unlimited),
+                0,
             )
     target_df = TFC_per_sector.div(TFC_df["TFC_per_capita"], axis=0)
 
