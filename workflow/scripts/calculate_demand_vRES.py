@@ -54,6 +54,7 @@ def calculate_vRES_demand(
     # Get electricity transmission & distribution losses (ignore the energy industry own use)
     df_loss_rate = pd.read_csv(elec_loss_rate, index_col=0)
     # Scale to actual production needed to meet this demand
+    breakpoint()
     df_elec_prod = df_elec.div(1 - df_loss_rate["ELEC_LOSS_RATE"], axis=0)
     # Get the decarbonised part
     elec_decarb = pd.read_csv(sector_elec_decarb, index_col=0)
