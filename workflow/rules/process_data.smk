@@ -21,7 +21,7 @@ rule get_historical_sector_TFC_share:
     message:
         """
         Get real-world total final energy consumption broken down by sector, 
-        for {params.countries} from IEA energy balances, in year {year}.
+        for {params.countries} from IEA energy balances, in year {params.year}.
         """
     params:
         countries=requested_countries,
