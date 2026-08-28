@@ -48,12 +48,14 @@ def process_countries_electrification_bySector(
             df_sector_electrification = df_electricity / df_TFC
             df_sector_electrification["ISO3"] = country
 
-        # Append the current country to the total countries dataframe
-        if i == 0:
-            df_all = df_sector_electrification
-        else:
-            df_all = pd.concat([df_all, df_sector_electrification], ignore_index=True)
-        i += 1
+            # Append the current country to the total countries dataframe
+            if i == 0:
+                df_all = df_sector_electrification
+            else:
+                df_all = pd.concat(
+                    [df_all, df_sector_electrification], ignore_index=True
+                )
+            i += 1
 
     # Do some cleaning
     # Move the country code to the front of the dataframe
