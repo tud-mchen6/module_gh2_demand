@@ -51,3 +51,4 @@ There might be conda environment issues when running this workflow on Windows. R
 - Make the population rule compatible to other scenarios than Medium
 - The IEA industry final energy consumption for Gabon is simply wrong. Need to cross-check with EIA data; if IEA data exceeds the number of EIA, that should probably be rescaled or manually corrected in the rules.
 - Unify the naming: 'reference' or 'historical'?
+- The root folder appears `<results>/demand`, and under `resources/processed/` there's a folder `IEA_`. Fix it that they don't appear.
