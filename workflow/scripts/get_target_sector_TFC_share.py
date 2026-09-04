@@ -81,67 +81,76 @@ def get_target_sector_TFC_share(
     # Cap the residential and commercial/public TFC based on current day highest level of the world
     # But also for countries whose TFC is scaling down, set a minimum level of TFC for residential and commercial/public
     # Get the current TFC per capita for countries
-    TFC_df = pd.read_csv(TFC_per_capita, index_col=0)
-    TFC_per_sector = target_df.mul(TFC_df["TFC_per_capita"], axis=0)
-    historical_TFC = pd.read_csv(historical_per_capita_TFC, index_col=0)
-    hist_TFC_per_sector = reference_df.mul(historical_TFC["TFC_per_capita"], axis=0)
-    # assume 0.9 quantile cutoff to avoid outliers. 0.9 quantile should be sufficient for decent living
-    remaining_sectors_limited = ["TOTTRANS", "AGRICULT", "FISHING"]
-    remaining_sectors_unlimited = ["TOTIND", "NONENUSE", "ONONSPEC"]
-    dict_max_TFC = {}
-    dict_min_TFC = {}
-    for sector in [remaining_sectors_limited, "RESIDENT", "COMMPUB"]:
-        if isinstance(sector, list):
-            for s in sector:
-                dict_max_TFC[s] = hist_TFC_per_sector[s].quantile(0.9)
-        else:
-            dict_max_TFC[sector] = hist_TFC_per_sector[sector].quantile(0.9)
-            dict_min_TFC[sector] = hist_TFC_per_sector[sector].quantile(0.5)
-    for country in TFC_df.index:
-        excess = 0
-        deficit = 0
-        if TFC_per_sector.at[country, "RESIDENT"] > dict_max_TFC["RESIDENT"]:
-            excess += TFC_per_sector.at[country, "RESIDENT"] - dict_max_TFC["RESIDENT"]
-            TFC_per_sector.at[country, "RESIDENT"] = dict_max_TFC["RESIDENT"]
-        if TFC_per_sector.at[country, "RESIDENT"] < dict_min_TFC["RESIDENT"]:
-            deficit += dict_min_TFC["RESIDENT"] - TFC_per_sector.at[country, "RESIDENT"]
-            TFC_per_sector.at[country, "RESIDENT"] = dict_min_TFC["RESIDENT"]
-        if TFC_per_sector.at[country, "COMMPUB"] > dict_max_TFC["COMMPUB"]:
-            excess += TFC_per_sector.at[country, "COMMPUB"] - dict_max_TFC["COMMPUB"]
-            TFC_per_sector.at[country, "COMMPUB"] = dict_max_TFC["COMMPUB"]
-        else:
-            remaining_sectors_limited.append("COMMPUB")
-        if TFC_per_sector.at[country, "COMMPUB"] < dict_min_TFC["COMMPUB"]:
-            deficit += dict_min_TFC["COMMPUB"] - TFC_per_sector.at[country, "COMMPUB"]
-            TFC_per_sector.at[country, "COMMPUB"] = dict_min_TFC["COMMPUB"]
-        # Re-distribute the other sectors. Assume industry, non-energy use and non
-        # specified can increase withouout limit, but everything else is capped.
-        excess_per_sector = excess / len(
-            remaining_sectors_limited + remaining_sectors_unlimited
-        )
-        additional_excess = 0
-        for sector in remaining_sectors_limited:
-            if (TFC_per_sector.at[country, sector] + excess_per_sector) > dict_max_TFC[
-                sector
-            ]:
-                additional_excess += (
-                    TFC_per_sector.at[country, sector] + excess_per_sector
-                ) - dict_max_TFC[sector]
-                TFC_per_sector.at[country, sector] = dict_max_TFC[sector]
+    if not use_historical:
+        TFC_df = pd.read_csv(TFC_per_capita, index_col=0)
+        TFC_per_sector = target_df.mul(TFC_df["TFC_per_capita"], axis=0)
+        historical_TFC = pd.read_csv(historical_per_capita_TFC, index_col=0)
+        hist_TFC_per_sector = reference_df.mul(historical_TFC["TFC_per_capita"], axis=0)
+        # assume 0.9 quantile cutoff to avoid outliers. 0.9 quantile should be sufficient for decent living
+        remaining_sectors_limited = ["TOTTRANS", "AGRICULT", "FISHING"]
+        remaining_sectors_unlimited = ["TOTIND", "NONENUSE", "ONONSPEC"]
+        dict_max_TFC = {}
+        dict_min_TFC = {}
+        for sector in [remaining_sectors_limited, "RESIDENT", "COMMPUB"]:
+            if isinstance(sector, list):
+                for s in sector:
+                    dict_max_TFC[s] = hist_TFC_per_sector[s].quantile(0.9)
             else:
-                TFC_per_sector.at[country, sector] += excess_per_sector
-        for sector in remaining_sectors_unlimited:
-            TFC_per_sector.at[country, sector] += (
-                excess_per_sector + additional_excess
-            ) / len(remaining_sectors_unlimited)
-            # The deficit from previous limited sectors need to be taken from the unlimited sectors
-            # But in case the unlimited sectors also don't have enough, set to 0
-            TFC_per_sector.at[country, sector] = max(
-                TFC_per_sector.at[country, sector]
-                - deficit / len(remaining_sectors_unlimited),
-                0,
+                dict_max_TFC[sector] = hist_TFC_per_sector[sector].quantile(0.9)
+                dict_min_TFC[sector] = hist_TFC_per_sector[sector].quantile(0.5)
+        for country in TFC_df.index:
+            excess = 0
+            deficit = 0
+            if TFC_per_sector.at[country, "RESIDENT"] > dict_max_TFC["RESIDENT"]:
+                excess += (
+                    TFC_per_sector.at[country, "RESIDENT"] - dict_max_TFC["RESIDENT"]
+                )
+                TFC_per_sector.at[country, "RESIDENT"] = dict_max_TFC["RESIDENT"]
+            if TFC_per_sector.at[country, "RESIDENT"] < dict_min_TFC["RESIDENT"]:
+                deficit += (
+                    dict_min_TFC["RESIDENT"] - TFC_per_sector.at[country, "RESIDENT"]
+                )
+                TFC_per_sector.at[country, "RESIDENT"] = dict_min_TFC["RESIDENT"]
+            if TFC_per_sector.at[country, "COMMPUB"] > dict_max_TFC["COMMPUB"]:
+                excess += (
+                    TFC_per_sector.at[country, "COMMPUB"] - dict_max_TFC["COMMPUB"]
+                )
+                TFC_per_sector.at[country, "COMMPUB"] = dict_max_TFC["COMMPUB"]
+            else:
+                remaining_sectors_limited.append("COMMPUB")
+            if TFC_per_sector.at[country, "COMMPUB"] < dict_min_TFC["COMMPUB"]:
+                deficit += (
+                    dict_min_TFC["COMMPUB"] - TFC_per_sector.at[country, "COMMPUB"]
+                )
+                TFC_per_sector.at[country, "COMMPUB"] = dict_min_TFC["COMMPUB"]
+            # Re-distribute the other sectors. Assume industry, non-energy use and non
+            # specified can increase withouout limit, but everything else is capped.
+            excess_per_sector = excess / len(
+                remaining_sectors_limited + remaining_sectors_unlimited
             )
-    target_df = TFC_per_sector.div(TFC_df["TFC_per_capita"], axis=0)
+            additional_excess = 0
+            for sector in remaining_sectors_limited:
+                if (
+                    TFC_per_sector.at[country, sector] + excess_per_sector
+                ) > dict_max_TFC[sector]:
+                    additional_excess += (
+                        TFC_per_sector.at[country, sector] + excess_per_sector
+                    ) - dict_max_TFC[sector]
+                    TFC_per_sector.at[country, sector] = dict_max_TFC[sector]
+                else:
+                    TFC_per_sector.at[country, sector] += excess_per_sector
+            for sector in remaining_sectors_unlimited:
+                TFC_per_sector.at[country, sector] += (
+                    excess_per_sector + additional_excess
+                ) / len(remaining_sectors_unlimited)
+                # The deficit from previous limited sectors need to be taken from the unlimited sectors
+                # But in case the unlimited sectors also don't have enough, set to 0
+                TFC_per_sector.at[country, sector] = max(
+                    TFC_per_sector.at[country, sector]
+                    - deficit / len(remaining_sectors_unlimited),
+                    0,
+                )
+        target_df = TFC_per_sector.div(TFC_df["TFC_per_capita"], axis=0)
 
     # Output the file
     target_df = target_df.round(4)
