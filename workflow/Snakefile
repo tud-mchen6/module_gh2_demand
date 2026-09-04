@@ -2,7 +2,16 @@ import yaml
 
 from snakemake.utils import min_version, validate
 
-min_version("8.10")
+min_version("9.19")
+
+
+# !!!!! IMPORTANT !!!!!
+# Define pathvars for all user resource files and result files
+# This allows users to re-wire how the module is used in their workflow with ease.
+pathvars:
+    resources="resources",
+    results="results",
+    logs="logs",
 
 
 # Load the example configuration. This will be overridden by users.
@@ -19,7 +28,12 @@ with open(workflow.source_path("internal/settings.yaml"), "r") as f:
 
 # Add all your includes here.
 include: "rules/automatic.smk"
-include: "rules/dummy.smk"
+include: "rules/process_data.smk"
+include: "rules/calculate_demand.smk"
+
+# Get necessary params to produce the final files
+scenario_name = config["required"]["scenario_name"]
+population_ref_year = config["required"]["population_ref_year"]
 
 # Add additional files to be delivered alongside the workflow here.
 # This is needed e.g. for python code files that are never
@@ -33,8 +47,9 @@ rule all:
     output:
         "INVALID",
     log:
-        stderr="logs/all.stderr",
+        stderr="<logs>/all.stderr",
     conda:
-        "envs/shell.yaml"
+        "envs/module.yaml"
     shell:
         'echo "This workflow must be called as a snakemake module." > {log.stderr}'
+

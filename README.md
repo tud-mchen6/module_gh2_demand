@@ -1,12 +1,6 @@
 # Global per-country estimates of electricity demand met by vRES and green hydrogen demand
 
-This module helps producing the demand number for electricity
-    demand met by variable Renewable Energy Sources and green hydrogen demand based
-    on assumptions of per capita total final energy use, sectoral electrification
-    and decarbonisation level, and population of each country. It uses a top-down
-    approach and allows different outputs with changing assumptions. For countries
-    included in the Energy Statistics Data Browser, the assumptions can be based on
-    today's data as a reference.
+This module helps producing the electricity needed to be produced by variable Renewable Energy Sources and green hydrogen demand based on assumptions of per capita total final energy use, sectoral electrification and decarbonisation level, as well as population of each country. It uses a top-down approach and allows different outputs with changing assumptions. For countries included in the IEA Energy Statistics Data Browser, the assumptions can be based on today's data as a reference.
 
 A modular `snakemake` workflow built for [`clio`](https://clio.readthedocs.io/) data modules.
 
@@ -14,6 +8,9 @@ A modular `snakemake` workflow built for [`clio`](https://clio.readthedocs.io/) 
 
 This module can be imported directly into any `snakemake` workflow.
 Please consult the integration example in `tests/integration/Snakefile` for more information.
+
+For detailed explanation of the module, see `docs/index.md`.
+
 
 ## Development
 
@@ -45,3 +42,5 @@ pixi shell    # activate this project's environment
 cd tests/integration/  # navigate to the integration example
 snakemake --use-conda --cores 2  # run the workflow!
 ```
+
+

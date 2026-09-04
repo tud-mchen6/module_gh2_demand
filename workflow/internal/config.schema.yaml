@@ -3,6 +3,76 @@ description: "Schema for user-provided configuration files."
 type: object
 additionalProperties: false
 properties:
+
   dummy_text:
     description: A template example. Should be deleted in real applications.
     type: string
+
+  # The input that MUST be provided by users.
+  required:
+    scenario_name:
+      description: Name of the scenario to be called.
+      type: string
+    
+    tot_per_capita_TFC:
+      description: In GJ, the (average) total final energy consumption per capita per year assumed for a country.
+      type: float
+    historical_per_capita_TFC:
+      description: Whether to use historical reference value of per capita TFC. If yes, then all user-input values are invalid.
+      type: bool
+    historical_sector_TFC_share:
+      description: Whether to keep the share of each sector in TFC as historical value. If yes, then all user-input values are invalid.
+      type: bool
+    sector_elec_rate_rel:
+      description: The ratio of target electrification rate for all sectors compared to the reference.
+      type: float
+      minimum: 0.1
+    elec_rate_in_case_zero:
+      description: The electrification rate assumed in case the reference value is zero.
+      type: float
+      maximum: 1
+    historical_elec_rate:
+      description: Whether to use historical reference value of electrification rate for each sector in each country. If yes, all user-input values in this regard are invalid.
+      type: bool
+    elec_decarb_rel:
+      description: The ratio of electricity target decarbonisation level for all sectors compared to the reference.
+      type: float
+      minimum: 0.1
+    elec_decarb_in_case_zero: 
+      description: The electricity decarbonisation level assumed in case the reference value is zero.
+      type: float
+      maximum: 1
+    historical_elec_decarb:
+      description: Whether to use historical reference value of decarbonisation level of electricity for each country.
+      type: bool
+    non_elec_decarb_rel:
+      description: The ratio of non-electricity target decarbonisation level for all sectors compared to the reference.
+      type: float
+      minimum: 0.1
+    non_elec_decarb_in_case_zero: 
+      description: The non-electricity decarbonisation level in case the reference value is zero.
+      type: float
+      maximum: 1
+    historical_non_elec_decarb:
+      description: Whether to use historical reference value of decarbonisation level of non-electricity for each country.
+      type: bool
+    population_ref_year:
+      description: The year to take as calculation basics for energy demands. Could be historical or future.
+      type: integer
+    population_scenario:
+      description: WPP population projection scenario to use. "Medium" is the one with historical values.
+      type: string
+    
+
+  
+  optional:
+    countries:
+      description: List of specifically selected countries to process, expressed by their ISO3 codes.
+      type: array
+      items:
+        type: string
+    year_for_IEA_balance:
+      description: Year for which to download the IEA energy balances; latest and the default is 2023 for now.
+      type: integer
+      minimum: 2000
+  
