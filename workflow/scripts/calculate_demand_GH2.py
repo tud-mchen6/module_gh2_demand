@@ -10,7 +10,6 @@ def calculate_GH2_demand(
     sector_electrification: str,
     sector_non_elec_decarb: str,
     population: str,
-    tot_per_capita_TFC: float,
     hist_non_elec_renew_consum: str,
 ):
     """
@@ -31,8 +30,6 @@ def calculate_GH2_demand(
     - sector_non_elec_decarb: str - Target decarbonisation level of the non-electrified part in
         each sector in each country.
     - population: str - Path the the population file used in the calculation.
-    - tot_per_capita_TFC: float - User-given universal default per capita total final energy
-        consumption for all countries. Given in config. Unit: GJ/year/capita.
     - hist_non_elec_renew_consum: str - Path to the historical non-electricity renewable
         energy consumption data.
     - country_overwrite: str - User-given overwrites of country-specific data, specifically
@@ -83,6 +80,5 @@ if __name__ == "__main__":
         sector_electrification=snakemake.input.sector_electrification,
         sector_non_elec_decarb=snakemake.input.sector_non_elec_decarb,
         population=snakemake.input.population,
-        tot_per_capita_TFC=snakemake.params.tot_per_capita_TFC,
         hist_non_elec_renew_consum=snakemake.input.hist_non_elec_renew_consum,
     )
