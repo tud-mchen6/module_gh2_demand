@@ -40,7 +40,7 @@ def get_historical_per_capita_TFC(
             dict_all["ISO3"].append(country)
             dict_all["TFC_per_capita"].append(TFC_per_capita)
 
-    output_dir = output_file.split("historical")[0]
+    output_dir = output_file.split("IEA")[0]
     os.makedirs(output_dir, exist_ok=True)
     pd.DataFrame.from_dict(dict_all).to_csv(output_file, index=False)
 
