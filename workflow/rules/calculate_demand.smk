@@ -167,8 +167,6 @@ rule calculate_vRES_demand:
         """
         Calculate electricity demand met by vRES for all considered countries.
         """
-    params:
-        output_dir="<results>/demand/",
     input:
         TFC_per_capita="<resources>/prepare/target_per_capita_TFC_{scenario_name}.csv",
         sector_TFC_share="<resources>/prepare/target_sector_TFC_share_{scenario_name}.csv",
@@ -192,7 +190,6 @@ rule calculate_GH2_demand:
         Calculate green hydrogen demand for all considered countries.
         """
     params:
-        output_dir="<results>/demand/",
         tot_per_capita_TFC=config["required"]["tot_per_capita_TFC"],
         use_historical_per_capita_TFC=config["required"]["historical_per_capita_TFC"],
         ref_year=ref_year,

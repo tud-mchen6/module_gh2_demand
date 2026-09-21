@@ -3,7 +3,6 @@ import os
 
 
 def calculate_GH2_demand(
-    output_dir: str,
     output_file: str,
     TFC_per_capita: str,
     sector_TFC_share: str,
@@ -20,7 +19,6 @@ def calculate_GH2_demand(
     Unit: TJ/year
 
     Parameters:
-    - output_dir: str - Path of the directory to save the target file.
     - output_file: str - Path to save the processed one CSV file.
     - TFC_per_capita: str - Path to the target per capita total final consumption for each country.
     - sector_TFC_share: str - Target share of total final consumption for each sector in
@@ -65,6 +63,7 @@ def calculate_GH2_demand(
     df_GH2_demand = df_decarb_non_elec_tot.to_frame(name="GH2_DEMAND")
     df_GH2_demand["UNIT"] = "TJ/year"
     # Create the output directory if not existing
+    output_dir = output_file.split("demand_GH2")[0]
     os.makedirs(output_dir, exist_ok=True)
     # Export the final df
     df_GH2_demand = df_GH2_demand.round(4)
@@ -73,7 +72,6 @@ def calculate_GH2_demand(
 
 if __name__ == "__main__":
     calculate_GH2_demand(
-        output_dir=snakemake.params.output_dir,
         output_file=snakemake.output.output_file,
         TFC_per_capita=snakemake.input.TFC_per_capita,
         sector_TFC_share=snakemake.input.sector_TFC_share,
