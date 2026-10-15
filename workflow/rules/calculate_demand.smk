@@ -205,15 +205,15 @@ rule calculate_GH2_demand:
         Calculate green hydrogen demand for all considered countries.
         """
     input:
-        TFC_per_capita="<resources>/prepare/target_per_capita_TFC_{scenario_name}.csv",
-        sector_TFC_share="<resources>/prepare/target_sector_TFC_share_{scenario_name}.csv",
-        sector_electrification="<resources>/prepare/target_sector_elec_rate_{scenario_name}.csv",
-        sector_non_elec_decarb="<resources>/prepare/target_non_elec_decarb_{scenario_name}.csv",
-        population="<resources>/processed/population_{population_scenario}_{population_ref_year}.csv",
-        hist_non_elec_renew_consum=lambda wc: (f"<resources>/processed/IEA_historical_non_elec_renew_consum_{ref_year}.csv"),
+        TFC_per_capita=f"<resources>/prepare/target_per_capita_TFC_{scenario_name}.csv",
+        sector_TFC_share=f"<resources>/prepare/target_sector_TFC_share_{scenario_name}.csv",
+        sector_electrification=f"<resources>/prepare/target_sector_elec_rate_{scenario_name}.csv",
+        sector_elec_decarb=f"<resources>/prepare/target_non_elec_decarb_{scenario_name}.csv",
+        population=f"<resources>/processed/population_{population_scenario}_{population_ref_year}.csv",
+        hist_non_elec_renew_consum=f"<resources>/processed/IEA_historical_non_elec_renew_consum_{ref_year}.csv",
     conda:
         "../envs/default.yaml"
     output:
-        output_file="<results>/demand/demand_GH2_{population_ref_year}_{population_scenario}_{scenario_name}.csv",
+        output_file=f"<results>/demand/demand_GH2_{scenario_name}.csv",
     script:
         "../scripts/calculate_demand_GH2.py"
