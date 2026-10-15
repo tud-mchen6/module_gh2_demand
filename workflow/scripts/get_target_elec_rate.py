@@ -46,7 +46,6 @@ def get_target_elec_rate(
     reference_df = pd.read_csv(reference_sector_elec_rate, index_col=0)
     if not use_historical:
         # If not use the historical values, go for the config-defined defaults
-        breakpoint()
         target_df = reference_df.copy().map(
             lambda x: scale_or_initialise(
                 x, sector_elec_rate_rel, elec_rate_in_case_zero
