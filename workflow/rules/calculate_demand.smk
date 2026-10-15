@@ -168,10 +168,6 @@ rule calculate_vRES_demand:
         """
         Calculate electricity demand met by vRES for all considered countries.
         """
-    params:
-        population_scenario=population_scenario,
-        population_ref_year=population_ref_year,
-        scenario_name=scenario_name,
     input:
         TFC_per_capita=f"<resources>/prepare/target_per_capita_TFC_{scenario_name}.csv",
         sector_TFC_share=f"<resources>/prepare/target_sector_TFC_share_{scenario_name}.csv",
@@ -182,19 +178,8 @@ rule calculate_vRES_demand:
         population=f"<resources>/processed/population_{population_scenario}_{population_ref_year}.csv",
     output:
         output_file=f"<results>/demand/demand_vRES_{scenario_name}.csv",
-    # input:
-    #     TFC_per_capita="<resources>/prepare/target_per_capita_TFC_{params.scenario_name}.csv",
-    #     sector_TFC_share="<resources>/prepare/target_sector_TFC_share_{params.scenario_name}.csv",
-    #     sector_electrification="<resources>/prepare/target_sector_elec_rate_{params.scenario_name}.csv",
-    #     sector_elec_decarb="<resources>/prepare/target_elec_decarb_{params.scenario_name}.csv",
-    #     elec_loss_rate=lambda wc: (f"<resources>/processed/IEA_historical_elec_TnD_loss_rate_{ref_year}.csv"),
-    #     other_renewables=lambda wc: (
-    #         f"<resources>/processed/IEA_historical_other_renewables_prod_{ref_year}.csv"),
-    #     population="<resources>/processed/population_{params.population_scenario}_{params.population_ref_year}.csv",
     conda:
         "../envs/default.yaml"
-    # output:
-    #     output_file="<results>/demand/demand_vRES_{params.scenario_name}.csv",
     script:
         "../scripts/calculate_demand_vRES.py"
 
@@ -208,7 +193,7 @@ rule calculate_GH2_demand:
         TFC_per_capita=f"<resources>/prepare/target_per_capita_TFC_{scenario_name}.csv",
         sector_TFC_share=f"<resources>/prepare/target_sector_TFC_share_{scenario_name}.csv",
         sector_electrification=f"<resources>/prepare/target_sector_elec_rate_{scenario_name}.csv",
-        sector_elec_decarb=f"<resources>/prepare/target_non_elec_decarb_{scenario_name}.csv",
+        sector_non_elec_decarb=f"<resources>/prepare/target_non_elec_decarb_{scenario_name}.csv",
         population=f"<resources>/processed/population_{population_scenario}_{population_ref_year}.csv",
         hist_non_elec_renew_consum=f"<resources>/processed/IEA_historical_non_elec_renew_consum_{ref_year}.csv",
     conda:
