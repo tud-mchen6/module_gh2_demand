@@ -5,9 +5,12 @@ import pandas as pd
 
 configfile: "config/config.yaml"
 
+scenario_name = config["scenario"]
+scenario_config = config["scenarios"][scenario_name]
+
 # The year to get energy balance or electricity balance data from IEA
-year = (config.get("optional") or {}).get("year_for_IEA_balance") or 2023
-population_scenario = config["required"]["population_scenario"]
+year = scenario_config.get("year_for_IEA_balance", 2023)
+population_scenario = scenario_config["population_scenario"]
 
 
 rule download_balances_IEA:

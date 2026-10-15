@@ -13,9 +13,11 @@ available_countries = [
     for f in glob.glob("<resources>/automatic/IEA_energy_balances/IEA_EnergyBalance_*.csv")
 ]
 
-scenario_name = config["required"]["scenario_name"]
-ref_year = config.get("year_for_IEA_balance", []) or 2023
-population_ref_year = config["required"]["population_ref_year"]
+scenario_name = config["scenario"]
+scenario_config = config["scenarios"][scenario_name]
+ref_year = scenario_config.get("year_for_IEA_balance", 2023)
+population_ref_year = scenario_config["population_ref_year"]
+population_scenario = scenario_config["population_scenario"]
 
 
 rule get_target_TFC_per_capita:
@@ -25,10 +27,10 @@ rule get_target_TFC_per_capita:
         per capita for each country.
         """
     params:
-        countries=config.get("countries", []) or available_countries,
+        countries=available_countries,
         scenario_name=scenario_name,
-        use_historical=config["required"]["historical_per_capita_TFC"],
-        tot_per_capita_TFC=config["required"]["tot_per_capita_TFC"],
+        use_historical=scenario_config["historical_per_capita_TFC"],
+        tot_per_capita_TFC=scenario_config["tot_per_capita_TFC"],
     input:
         # TODO: in the integrated workflow, this file needs to be manually put there - write in README
         country_overwrite="<resources>/user/country_level_overwrite.csv",
@@ -50,11 +52,10 @@ rule get_target_sector_TFC_share:
         total final consumption for each country.
         """
     params:
-        countries=config.get("countries", []) or available_countries,
+        countries=available_countries,
         ref_year=ref_year,
         sector_overwrite_dir="<resources>/user/sector_level_overwrite",
         scenario_name=scenario_name,
-        use_historical=config["required"]["historical_sector_TFC_share"],
     input:
         country_overwrite="<resources>/user/country_level_overwrite.csv",
         TFC_per_capita="<resources>/prepare/target_per_capita_TFC_{scenario_name}.csv",
@@ -82,13 +83,13 @@ rule get_target_elec_rate_by_sector:
         the global value defined in config.
         """
     params:
-        countries=config.get("countries", []) or available_countries,
+        countries=available_countries,
         ref_year=ref_year,
         sector_overwrite_dir="<resources>/user/sector_level_overwrite",
         scenario_name=scenario_name,
-        sector_elec_rate_rel=config["required"]["sector_elec_rate_rel"],
-        elec_rate_in_case_zero=config["required"]["elec_rate_in_case_zero"],
-        use_historical=config["required"]["historical_elec_rate"],
+        sector_elec_rate_rel=scenario_config["sector_elec_rate_rel"],
+        elec_rate_in_case_zero=scenario_config["elec_rate_in_case_zero"],
+        use_historical=scenario_config["historical_elec_rate"],
     input:
         country_overwrite="<resources>/user/country_level_overwrite.csv",
         reference_sector_elec_rate=lambda wc: (
@@ -112,13 +113,13 @@ rule get_target_elec_decarb:
         the global value defined in config.
         """
     params:
-        countries=config.get("countries", []) or available_countries,
+        countries=available_countries,
         ref_year=ref_year,
         sector_overwrite_dir="<resources>/user/sector_level_overwrite",
         scenario_name=scenario_name,
-        elec_decarb_rel=config["required"]["elec_decarb_rel"],
-        elec_decarb_in_case_zero=config["required"]["elec_decarb_in_case_zero"],
-        use_historical=config["required"]["historical_elec_decarb"],
+        elec_decarb_rel=scenario_config["elec_decarb_rel"],
+        elec_decarb_in_case_zero=scenario_config["elec_decarb_in_case_zero"],
+        use_historical=scenario_config["historical_elec_decarb"],
     input:
         country_overwrite="<resources>/user/country_level_overwrite.csv",
         reference_sector_elec_decarb=lambda wc: (
@@ -142,13 +143,13 @@ rule get_target_non_elec_decarb:
         the global value defined in config.
         """
     params:
-        countries=config.get("countries", []) or available_countries,
+        countries=available_countries,
         ref_year=ref_year,
         sector_overwrite_dir="<resources>/user/sector_level_overwrite",
         scenario_name=scenario_name,
-        non_elec_decarb_rel=config["required"]["non_elec_decarb_rel"],
-        non_elec_decarb_in_case_zero=config["required"]["non_elec_decarb_in_case_zero"],
-        use_historical=config["required"]["historical_non_elec_decarb"],
+        non_elec_decarb_rel=scenario_config["non_elec_decarb_rel"],
+        non_elec_decarb_in_case_zero=scenario_config["non_elec_decarb_in_case_zero"],
+        use_historical=scenario_config["historical_non_elec_decarb"],
     input:
         country_overwrite="<resources>/user/country_level_overwrite.csv",
         reference_sector_non_elec_decarb=lambda wc: (
@@ -167,19 +168,33 @@ rule calculate_vRES_demand:
         """
         Calculate electricity demand met by vRES for all considered countries.
         """
+    params:
+        population_scenario=population_scenario,
+        population_ref_year=population_ref_year,
+        scenario_name=scenario_name,
     input:
-        TFC_per_capita="<resources>/prepare/target_per_capita_TFC_{scenario_name}.csv",
-        sector_TFC_share="<resources>/prepare/target_sector_TFC_share_{scenario_name}.csv",
-        sector_electrification="<resources>/prepare/target_sector_elec_rate_{scenario_name}.csv",
-        sector_elec_decarb="<resources>/prepare/target_elec_decarb_{scenario_name}.csv",
-        elec_loss_rate=lambda wc: (f"<resources>/processed/IEA_historical_elec_TnD_loss_rate_{ref_year}.csv"),
-        other_renewables=lambda wc: (
-            f"<resources>/processed/IEA_historical_other_renewables_prod_{ref_year}.csv"),
-        population="<resources>/processed/population_{population_scenario}_{population_ref_year}.csv",
+        TFC_per_capita=f"<resources>/prepare/target_per_capita_TFC_{scenario_name}.csv",
+        sector_TFC_share=f"<resources>/prepare/target_sector_TFC_share_{scenario_name}.csv",
+        sector_electrification=f"<resources>/prepare/target_sector_elec_rate_{scenario_name}.csv",
+        sector_elec_decarb=f"<resources>/prepare/target_elec_decarb_{scenario_name}.csv",
+        elec_loss_rate=f"<resources>/processed/IEA_historical_elec_TnD_loss_rate_{ref_year}.csv",
+        other_renewables=f"<resources>/processed/IEA_historical_other_renewables_prod_{ref_year}.csv",
+        population=f"<resources>/processed/population_{population_scenario}_{population_ref_year}.csv",
+    output:
+        output_file=f"<results>/demand/demand_vRES_{scenario_name}.csv",
+    # input:
+    #     TFC_per_capita="<resources>/prepare/target_per_capita_TFC_{params.scenario_name}.csv",
+    #     sector_TFC_share="<resources>/prepare/target_sector_TFC_share_{params.scenario_name}.csv",
+    #     sector_electrification="<resources>/prepare/target_sector_elec_rate_{params.scenario_name}.csv",
+    #     sector_elec_decarb="<resources>/prepare/target_elec_decarb_{params.scenario_name}.csv",
+    #     elec_loss_rate=lambda wc: (f"<resources>/processed/IEA_historical_elec_TnD_loss_rate_{ref_year}.csv"),
+    #     other_renewables=lambda wc: (
+    #         f"<resources>/processed/IEA_historical_other_renewables_prod_{ref_year}.csv"),
+    #     population="<resources>/processed/population_{params.population_scenario}_{params.population_ref_year}.csv",
     conda:
         "../envs/default.yaml"
-    output:
-        output_file="<results>/demand/demand_vRES_{population_ref_year}_{population_scenario}_{scenario_name}.csv",
+    # output:
+    #     output_file="<results>/demand/demand_vRES_{params.scenario_name}.csv",
     script:
         "../scripts/calculate_demand_vRES.py"
 
@@ -189,10 +204,6 @@ rule calculate_GH2_demand:
         """
         Calculate green hydrogen demand for all considered countries.
         """
-    params:
-        tot_per_capita_TFC=config["required"]["tot_per_capita_TFC"],
-        use_historical_per_capita_TFC=config["required"]["historical_per_capita_TFC"],
-        ref_year=ref_year,
     input:
         TFC_per_capita="<resources>/prepare/target_per_capita_TFC_{scenario_name}.csv",
         sector_TFC_share="<resources>/prepare/target_sector_TFC_share_{scenario_name}.csv",

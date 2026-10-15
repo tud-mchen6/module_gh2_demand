@@ -5,15 +5,18 @@ import os
 
 configfile: "config/config.yaml"
 
-# If default_countries is True, get all available countries from IEA dataset
+scenario_name = config["scenario"]
+scenario_config = config["scenarios"][scenario_name]
+
+# Get all available countries from IEA dataset
 country_codes = pd.read_csv(workflow.source_path("../internal/country_codes.csv"))
 requested_countries = country_codes.loc[country_codes['IEA'].notna(), 'ISO3'].tolist()
 # Default processing year is 2023 unless specified in config
-year = (config.get("optional") or {}).get("year_for_IEA_balance") or 2023
+year = scenario_config.get("year_for_IEA_balance", 2023)
 # The year to create the demand data for. The population of this year will be used
 # to calculate the final demand.
-population_ref_year = config["required"]["population_ref_year"]
-population_scenario = config["required"]["population_scenario"]
+population_ref_year = scenario_config["population_ref_year"]
+population_scenario = scenario_config["population_scenario"]
 
 
 
