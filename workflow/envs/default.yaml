@@ -1,0 +1,12 @@
+name: default
+channels:
+  - conda-forge
+  - nodefaults
+dependencies:
+  - python=3.13
+  - click=8.2.1
+  - pandas=2.3.0
+  - xarray=2025.6.1
+  - matplotlib=3.10.3
+  - pyyaml=6.0.3
+  - ipdb=0.13.13

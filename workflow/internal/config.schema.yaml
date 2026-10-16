@@ -1,8 +1,91 @@
+
 $schema: "https://json-schema.org/draft/2020-12/schema"
 description: "Schema for user-provided configuration files."
 type: object
 additionalProperties: false
+
 properties:
-  dummy_text:
-    description: A template example. Should be deleted in real applications.
-    type: string
+  # scenario:
+  #   description: The selected scenario for the calculation.
+  #   type: string
+  #   pattern: "^[A-Za-z0-9_-]+$"
+  #   minLength: 1
+  scenarios:
+    description: Scenarios for which to calculate electricity and hydrogen demand.
+    type: object
+    patternProperties:
+      "^[A-Za-z0-9_-]+$":
+        $ref: "#/$defs/scenarios"
+    minProperties: 1
+    additionalProperties: false
+
+$defs:
+  # scenario:
+  #   type: object
+  #   additionalProperties: false
+  scenarios:
+    type: object
+    properties:
+      tot_per_capita_TFC:
+        description: In GJ, the (average) total final energy consumption per capita per year assumed for a country.
+        type: number
+
+      historical_per_capita_TFC:
+        description: Whether to use historical reference value of per capita TFC. If yes, then all user-input values are invalid.
+        type: boolean
+
+      sector_elec_rate_rel:
+        description: The addition of target electrification rate for all sectors compared to the reference.
+        type: number
+        minimum: 0.1
+
+      elec_rate_in_case_zero:
+        description: The electrification rate assumed in case the reference value is zero.
+        type: number
+        maximum: 1
+
+      historical_elec_rate:
+        description: Whether to use historical reference value of electrification rate for each sector in each country. If yes, all user-input values in this regard are invalid.
+        type: boolean
+
+      elec_decarb_rel:
+        description: The addition of electricity target decarbonisation level for all sectors compared to the reference.
+        type: number
+        minimum: 0.1
+
+      elec_decarb_in_case_zero:
+        description: The electricity decarbonisation level assumed in case the reference value is zero.
+        type: number
+        maximum: 1
+
+      historical_elec_decarb:
+        description: Whether to use historical reference value of decarbonisation level of electricity for each country.
+        type: boolean
+
+      non_elec_decarb_rel:
+        description: The addition of non-electricity target decarbonisation level for all sectors compared to the reference.
+        type: number
+        minimum: 0.1
+
+      non_elec_decarb_in_case_zero:
+        description: The non-electricity decarbonisation level assumed in case the reference value is zero.
+        type: number
+        maximum: 1
+
+      historical_non_elec_decarb:
+        description: Whether to use historical reference value of decarbonisation level of non-electricity for each country.
+        type: boolean
+
+      population_ref_year:
+        description: The year to take as calculation basics for energy demands. Could be historical or future.
+        type: integer
+
+      population_scenario:
+        description: WPP population projection scenario to use. "Medium" is the one with historical values.
+        type: string
+
+      year_for_IEA_balance:
+        description: Year for which to download the IEA energy balances; latest and the default is 2023 for now.
+        type: integer
+        minimum: 2000
+
