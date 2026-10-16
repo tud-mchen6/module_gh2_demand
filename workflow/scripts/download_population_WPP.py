@@ -12,6 +12,7 @@ def download_WPP_population(output_file: str):
     - output_path: str - The path to save the downloaded CSV file.
     - scenario: str - The population projection scenario to filter the data by. Default is 'Medium' - there is real-world data
     before 2025.
+    Possible values for population scenarios: High, Low, Medium, No change, Zero migration, Constant fertility, Constant mortality...
     """
 
     URL = "https://population.un.org/wpp/assets/Excel%20Files/1_Indicator%20(Standard)/CSV_FILES/WPP2024_TotalPopulationBySex.csv.gz"
