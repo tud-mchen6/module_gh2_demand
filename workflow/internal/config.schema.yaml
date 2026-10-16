@@ -5,11 +5,11 @@ type: object
 additionalProperties: false
 
 properties:
-  scenario:
-    description: The selected scenario for the calculation.
-    type: string
-    pattern: "^[A-Za-z0-9_-]+$"
-    minLength: 1
+  # scenario:
+  #   description: The selected scenario for the calculation.
+  #   type: string
+  #   pattern: "^[A-Za-z0-9_-]+$"
+  #   minLength: 1
   scenarios:
     description: Scenarios for which to calculate electricity and hydrogen demand.
     type: object
@@ -20,9 +20,9 @@ properties:
     additionalProperties: false
 
 $defs:
-  scenario:
-    type: object
-    additionalProperties: false
+  # scenario:
+  #   type: object
+  #   additionalProperties: false
   scenarios:
     type: object
     properties:

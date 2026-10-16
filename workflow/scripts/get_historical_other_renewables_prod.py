@@ -39,7 +39,7 @@ def process_countries_other_renewables_prod(
             country = file.split("_")[-2]
             df = pd.read_csv(file)
             # Step 1. Get electricity production by carrier of the given year
-            df_year = df[(df["year"] == year) & (df["product"] == "ELECTR")]
+            df_year = df[(df["year"] == int(year)) & (df["product"] == "ELECTR")]
             df_year = df_year.pivot(
                 index="short", columns="flow", values="value"
             ).fillna(0)

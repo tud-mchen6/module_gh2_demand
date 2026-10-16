@@ -53,7 +53,7 @@ def process_countries_elec_decarb(input_dir: str, countries, output_file: str, y
             df = pd.read_csv(file)
             # Step 1. Get electricity production by carrier of the given year
             df_year = df[
-                (df["year"] == year)
+                (df["year"] == int(year))
                 & (df["product"] == "ELECTR")
                 & (df["flow"].isin(list_carriers))
             ]

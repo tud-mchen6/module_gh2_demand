@@ -13,11 +13,38 @@ available_countries = [
     for f in glob.glob("<resources>/automatic/IEA_energy_balances/IEA_EnergyBalance_*.csv")
 ]
 
-scenario_name = config["scenario"]
-scenario_config = config["scenarios"][scenario_name]
-ref_year = scenario_config.get("year_for_IEA_balance", 2023)
-population_ref_year = scenario_config["population_ref_year"]
-population_scenario = scenario_config["population_scenario"]
+def get_scenario_config(wildcards):
+    return config["scenarios"][wildcards.scenario]
+def get_year(wildcards):
+    return get_scenario_config(wildcards).get(
+        "year_for_IEA_balance", 2023
+    )
+def get_population_scenario(wildcards):
+    return get_scenario_config(wildcards)["population_scenario"]
+def get_population_ref_year(wildcards):
+    return get_scenario_config(wildcards)["population_ref_year"]
+def get_historical_per_capita_TFC(wildcards):
+    return get_scenario_config(wildcards)["historical_per_capita_TFC"]
+def get_tot_per_capita_TFC(wildcards):
+    return get_scenario_config(wildcards)["tot_per_capita_TFC"]
+def get_sector_elec_rate_rel(wildcards):
+    return get_scenario_config(wildcards)["sector_elec_rate_rel"]
+def get_elec_rate_in_case_zero(wildcards):
+    return get_scenario_config(wildcards)["elec_rate_in_case_zero"]
+def get_historical_elec_rate(wildcards):
+    return get_scenario_config(wildcards)["historical_elec_rate"]
+def get_historical_elec_decarb(wildcards):
+    return get_scenario_config(wildcards)["historical_elec_decarb"]
+def get_elec_decarb_rel(wildcards):
+    return get_scenario_config(wildcards)["elec_decarb_rel"]
+def get_elec_decarb_in_case_zero(wildcards):
+    return get_scenario_config(wildcards)["elec_decarb_in_case_zero"]
+def get_non_elec_decarb_rel(wildcards):
+    return get_scenario_config(wildcards)["non_elec_decarb_rel"]
+def get_non_elec_decarb_in_case_zero(wildcards):
+    return get_scenario_config(wildcards)["non_elec_decarb_in_case_zero"]
+def get_historical_non_elec_decarb(wildcards):
+    return get_scenario_config(wildcards)["historical_non_elec_decarb"]
 
 
 rule get_target_TFC_per_capita:
@@ -28,19 +55,18 @@ rule get_target_TFC_per_capita:
         """
     params:
         countries=available_countries,
-        scenario_name=scenario_name,
-        use_historical=scenario_config["historical_per_capita_TFC"],
-        tot_per_capita_TFC=scenario_config["tot_per_capita_TFC"],
+        use_historical=get_historical_per_capita_TFC,
+        tot_per_capita_TFC=get_tot_per_capita_TFC,
     input:
         # TODO: in the integrated workflow, this file needs to be manually put there - write in README
         country_overwrite="<resources>/user/country_level_overwrite.csv",
         reference_per_capita_TFC=lambda wc: (
-            f"<resources>/processed/IEA_historical_per_capita_TFC_{ref_year}.csv"
+            f"<resources>/processed/IEA_historical_per_capita_TFC_{get_year(wc)}.csv"
         )
     conda:
         "../envs/default.yaml"
     output:
-        output_file="<resources>/prepare/target_per_capita_TFC_{scenario_name}.csv"
+        output_file="<resources>/prepare/target_per_capita_TFC_{scenario}.csv"
     script:
         "../scripts/get_target_TFC_per_capita.py"
 
@@ -53,22 +79,21 @@ rule get_target_sector_TFC_share:
         """
     params:
         countries=available_countries,
-        ref_year=ref_year,
+        ref_year=get_population_ref_year,
         sector_overwrite_dir="<resources>/user/sector_level_overwrite",
-        scenario_name=scenario_name,
     input:
         country_overwrite="<resources>/user/country_level_overwrite.csv",
-        TFC_per_capita="<resources>/prepare/target_per_capita_TFC_{scenario_name}.csv",
+        TFC_per_capita="<resources>/prepare/target_per_capita_TFC_{scenario}.csv",
         reference_sector_TFC_share=lambda wc: (
-            f"<resources>/processed/IEA_historical_sector_TFC_share_{ref_year}.csv"
+            f"<resources>/processed/IEA_historical_sector_TFC_share_{get_year(wc)}.csv"
         ),
         reference_per_capita_TFC=lambda wc: (
-            f"<resources>/processed/IEA_historical_per_capita_TFC_{ref_year}.csv"
+            f"<resources>/processed/IEA_historical_per_capita_TFC_{get_year(wc)}.csv"
         )
     conda:
         "../envs/default.yaml"
     output:
-        output_file="<resources>/prepare/target_sector_TFC_share_{scenario_name}.csv"
+        output_file="<resources>/prepare/target_sector_TFC_share_{scenario}.csv"
     script:
         "../scripts/get_target_sector_TFC_share.py"
 
@@ -84,19 +109,18 @@ rule get_target_elec_rate_by_sector:
         """
     params:
         countries=available_countries,
-        ref_year=ref_year,
+        ref_year=get_population_ref_year,
         sector_overwrite_dir="<resources>/user/sector_level_overwrite",
-        scenario_name=scenario_name,
-        sector_elec_rate_rel=scenario_config["sector_elec_rate_rel"],
-        elec_rate_in_case_zero=scenario_config["elec_rate_in_case_zero"],
-        use_historical=scenario_config["historical_elec_rate"],
+        sector_elec_rate_rel=get_sector_elec_rate_rel,
+        elec_rate_in_case_zero=get_elec_rate_in_case_zero,
+        use_historical=get_historical_elec_rate,
     input:
         country_overwrite="<resources>/user/country_level_overwrite.csv",
         reference_sector_elec_rate=lambda wc: (
-            f"<resources>/processed/IEA_historical_sector_electrification_{ref_year}.csv"
+            f"<resources>/processed/IEA_historical_sector_electrification_{get_year(wc)}.csv"
         )
     output:
-        output_file="<resources>/prepare/target_sector_elec_rate_{scenario_name}.csv"
+        output_file="<resources>/prepare/target_sector_elec_rate_{scenario}.csv"
     conda:
         "../envs/default.yaml"
     script:
@@ -114,19 +138,18 @@ rule get_target_elec_decarb:
         """
     params:
         countries=available_countries,
-        ref_year=ref_year,
+        ref_year=get_population_ref_year,
         sector_overwrite_dir="<resources>/user/sector_level_overwrite",
-        scenario_name=scenario_name,
-        elec_decarb_rel=scenario_config["elec_decarb_rel"],
-        elec_decarb_in_case_zero=scenario_config["elec_decarb_in_case_zero"],
-        use_historical=scenario_config["historical_elec_decarb"],
+        elec_decarb_rel=get_elec_decarb_rel,
+        elec_decarb_in_case_zero=get_elec_decarb_in_case_zero,
+        use_historical=get_historical_elec_decarb,
     input:
         country_overwrite="<resources>/user/country_level_overwrite.csv",
         reference_sector_elec_decarb=lambda wc: (
-            f"<resources>/processed/IEA_historical_elec_decarb_{ref_year}.csv"
+            f"<resources>/processed/IEA_historical_elec_decarb_{get_year(wc)}.csv"
         )
     output:
-        output_file="<resources>/prepare/target_elec_decarb_{scenario_name}.csv"
+        output_file="<resources>/prepare/target_elec_decarb_{scenario}.csv"
     conda:
         "../envs/default.yaml"
     script:
@@ -144,21 +167,20 @@ rule get_target_non_elec_decarb:
         """
     params:
         countries=available_countries,
-        ref_year=ref_year,
+        ref_year=get_population_ref_year,
         sector_overwrite_dir="<resources>/user/sector_level_overwrite",
-        scenario_name=scenario_name,
-        non_elec_decarb_rel=scenario_config["non_elec_decarb_rel"],
-        non_elec_decarb_in_case_zero=scenario_config["non_elec_decarb_in_case_zero"],
-        use_historical=scenario_config["historical_non_elec_decarb"],
+        non_elec_decarb_rel=get_non_elec_decarb_rel,
+        non_elec_decarb_in_case_zero=get_non_elec_decarb_in_case_zero,
+        use_historical=get_historical_non_elec_decarb,
     input:
         country_overwrite="<resources>/user/country_level_overwrite.csv",
         reference_sector_non_elec_decarb=lambda wc: (
-            f"<resources>/processed/IEA_historical_non_elec_decarb_{ref_year}.csv"
+            f"<resources>/processed/IEA_historical_non_elec_decarb_{get_year(wc)}.csv"
         )
     conda:
         "../envs/default.yaml"
     output:
-        output_file="<resources>/prepare/target_non_elec_decarb_{scenario_name}.csv"
+        output_file="<resources>/prepare/target_non_elec_decarb_{scenario}.csv"
     script:
         "../scripts/get_target_non_elec_decarb.py"
 
@@ -169,15 +191,15 @@ rule calculate_vRES_demand:
         Calculate electricity demand met by vRES for all considered countries.
         """
     input:
-        TFC_per_capita=f"<resources>/prepare/target_per_capita_TFC_{scenario_name}.csv",
-        sector_TFC_share=f"<resources>/prepare/target_sector_TFC_share_{scenario_name}.csv",
-        sector_electrification=f"<resources>/prepare/target_sector_elec_rate_{scenario_name}.csv",
-        sector_elec_decarb=f"<resources>/prepare/target_elec_decarb_{scenario_name}.csv",
-        elec_loss_rate=f"<resources>/processed/IEA_historical_elec_TnD_loss_rate_{ref_year}.csv",
-        other_renewables=f"<resources>/processed/IEA_historical_other_renewables_prod_{ref_year}.csv",
-        population=f"<resources>/processed/population_{population_scenario}_{population_ref_year}.csv",
+        TFC_per_capita="<resources>/prepare/target_per_capita_TFC_{scenario}.csv",
+        sector_TFC_share="<resources>/prepare/target_sector_TFC_share_{scenario}.csv",
+        sector_electrification="<resources>/prepare/target_sector_elec_rate_{scenario}.csv",
+        sector_elec_decarb="<resources>/prepare/target_elec_decarb_{scenario}.csv",
+        elec_loss_rate=lambda wc: (f"<resources>/processed/IEA_historical_elec_TnD_loss_rate_{get_year(wc)}.csv"),
+        other_renewables=lambda wc: (f"<resources>/processed/IEA_historical_other_renewables_prod_{get_year(wc)}.csv"),
+        population=lambda wc: (f"<resources>/processed/population_{get_population_scenario(wc)}_{get_population_ref_year(wc)}.csv"),
     output:
-        output_file=f"<results>/demand/demand_vRES_{scenario_name}.csv",
+        output_file="<results>/demand/demand_vRES_{scenario}.csv",
     conda:
         "../envs/default.yaml"
     script:
@@ -190,15 +212,15 @@ rule calculate_GH2_demand:
         Calculate green hydrogen demand for all considered countries.
         """
     input:
-        TFC_per_capita=f"<resources>/prepare/target_per_capita_TFC_{scenario_name}.csv",
-        sector_TFC_share=f"<resources>/prepare/target_sector_TFC_share_{scenario_name}.csv",
-        sector_electrification=f"<resources>/prepare/target_sector_elec_rate_{scenario_name}.csv",
-        sector_non_elec_decarb=f"<resources>/prepare/target_non_elec_decarb_{scenario_name}.csv",
-        population=f"<resources>/processed/population_{population_scenario}_{population_ref_year}.csv",
-        hist_non_elec_renew_consum=f"<resources>/processed/IEA_historical_non_elec_renew_consum_{ref_year}.csv",
+        TFC_per_capita="<resources>/prepare/target_per_capita_TFC_{scenario}.csv",
+        sector_TFC_share="<resources>/prepare/target_sector_TFC_share_{scenario}.csv",
+        sector_electrification="<resources>/prepare/target_sector_elec_rate_{scenario}.csv",
+        sector_non_elec_decarb="<resources>/prepare/target_non_elec_decarb_{scenario}.csv",
+        population=lambda wc: (f"<resources>/processed/population_{get_population_scenario(wc)}_{get_population_ref_year(wc)}.csv"),
+        hist_non_elec_renew_consum=lambda wc: (f"<resources>/processed/IEA_historical_non_elec_renew_consum_{get_year(wc)}.csv"),
     conda:
         "../envs/default.yaml"
     output:
-        output_file=f"<results>/demand/demand_GH2_{scenario_name}.csv",
+        output_file="<results>/demand/demand_GH2_{scenario}.csv",
     script:
         "../scripts/calculate_demand_GH2.py"

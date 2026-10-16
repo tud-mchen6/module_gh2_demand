@@ -5,18 +5,24 @@ import os
 
 configfile: "config/config.yaml"
 
-scenario_name = config["scenario"]
-scenario_config = config["scenarios"][scenario_name]
+# scenario = config["scenario"]
+# scenario_config = config["scenarios"][scenario]
 
 # Get all available countries from IEA dataset
 country_codes = pd.read_csv(workflow.source_path("../internal/country_codes.csv"))
 requested_countries = country_codes.loc[country_codes['IEA'].notna(), 'ISO3'].tolist()
 # Default processing year is 2023 unless specified in config
-year = scenario_config.get("year_for_IEA_balance", 2023)
+def get_scenario_config(scenario):
+    return config["scenarios"][scenario]
+def get_year(wildcards):
+    return get_scenario_config(wildcards)["population_scenario"]
 # The year to create the demand data for. The population of this year will be used
 # to calculate the final demand.
-population_ref_year = scenario_config["population_ref_year"]
-population_scenario = scenario_config["population_scenario"]
+def get_population_scenario(wildcards):
+    return get_scenario_config(wildcards)["population_scenario"]
+
+def get_population_ref_year(wildcards):
+    return get_scenario_config(wildcards)["population_ref_year"]
 
 
 
@@ -28,9 +34,9 @@ rule get_historical_sector_TFC_share:
         """
     params:
         countries=requested_countries,
-        year=year,    
+        year=lambda wc: wc.year,
     input:
-        input_dir="<resources>/automatic/IEA_energy_balances/",
+        input_dir="<resources>/automatic/IEA_energy_balances/{year}",
     output:
         output_file="<resources>/processed/IEA_historical_sector_TFC_share_{year}.csv"
     conda:
@@ -47,9 +53,9 @@ rule get_historical_sector_electrification:
         """
     params:
         countries=requested_countries,
-        year=year,
+        year=lambda wc: wc.year,
     input:
-        input_dir="<resources>/automatic/IEA_energy_balances/",
+        input_dir="<resources>/automatic/IEA_energy_balances/{year}",
     output:
         output_file="<resources>/processed/IEA_historical_sector_electrification_{year}.csv"
     conda:
@@ -63,10 +69,10 @@ rule get_historical_elec_decarb:
         "Calculate real-world electricity decarbonisation level, for {params.countries} from IEA energy balances."
     params:
         countries=requested_countries,
-        year=year,
+        year=lambda wc: wc.year,
     input:
         # The heat balance file contains data for both electricity and heat
-        input_dir="<resources>/automatic/IEA_elec_heat_balances/",
+        input_dir="<resources>/automatic/IEA_elec_heat_balances/{year}",
     output:
         output_file="<resources>/processed/IEA_historical_elec_decarb_{year}.csv"
     conda:
@@ -80,9 +86,9 @@ rule get_historical_heat_decarb:
         "Calculate real-world heat decarbonisation level, for {params.countries} from IEA heat balances."
     params:
         countries=requested_countries,
-        year=year,
+        year=lambda wc: wc.year,
     input:
-        input_dir="<resources>/automatic/IEA_elec_heat_balances/",
+        input_dir="<resources>/automatic/IEA_elec_heat_balances/{year}",
     output:
         output_file="<resources>/processed/IEA_historical_heat_decarb_{year}.csv"
     conda:
@@ -99,9 +105,9 @@ rule get_historical_non_elec_decarb:
         """
     params:
         countries=requested_countries,
-        year=year,
+        year=lambda wc: wc.year,
     input:
-        input_dir="<resources>/automatic/IEA_energy_balances/",
+        input_dir="<resources>/automatic/IEA_energy_balances/{year}",
         heat_decarb="<resources>/processed/IEA_historical_heat_decarb_{year}.csv"
     output:
         output_file="<resources>/processed/IEA_historical_non_elec_decarb_{year}.csv"
@@ -120,9 +126,9 @@ rule get_historical_other_renewables_prod:
         """
     params:
         countries=requested_countries,
-        year=year,
+        year=lambda wc: wc.year,
     input:
-        input_dir="<resources>/automatic/IEA_elec_heat_balances/",
+        input_dir="<resources>/automatic/IEA_elec_heat_balances/{year}",
     output:
         output_file="<resources>/processed/IEA_historical_other_renewables_prod_{year}.csv"
     conda:
@@ -139,9 +145,9 @@ rule get_historical_non_elec_renew_consum:
         """
     params:
         countries=requested_countries,
-        year=year,
+        year=lambda wc: wc.year,
     input:
-        input_dir="<resources>/automatic/IEA_energy_balances/",
+        input_dir="<resources>/automatic/IEA_energy_balances/{year}",
         heat_decarb="<resources>/processed/IEA_historical_heat_decarb_{year}.csv",
     output:
         output_file="<resources>/processed/IEA_historical_non_elec_renew_consum_{year}.csv"
@@ -162,7 +168,7 @@ rule get_population:
     output:
         population_output="<resources>/processed/population_{population_scenario}_{year}.csv",
     params:
-        population_ref_year=lambda wildcards: wildcards.year,
+        population_ref_year=lambda wc: wc.year,
         output_dir="<resources>/processed/",
     conda:
         "../envs/default.yaml"
@@ -178,9 +184,9 @@ rule get_historical_per_capita_TFC:
         """
     params:
         countries=requested_countries,
-        year=year,
+        year=lambda wc: wc.year,
     input:
-        input_dir="<resources>/automatic/IEA_energy_balances/",
+        input_dir="<resources>/automatic/IEA_energy_balances/{year}",
         population_input="<resources>/processed/population_Medium_{year}.csv",
     output:
         output_file="<resources>/processed/IEA_historical_per_capita_TFC_{year}.csv",
@@ -197,9 +203,9 @@ rule get_historical_elec_TnD_loss_rate:
         """
     params:
         countries=requested_countries,
-        year=year,
+        year=lambda wc: wc.year,
     input:
-        input_dir="<resources>/automatic/IEA_elec_heat_balances/",
+        input_dir="<resources>/automatic/IEA_elec_heat_balances/{year}",
     output:
         output_file="<resources>/processed/IEA_historical_elec_TnD_loss_rate_{year}.csv",
     conda:

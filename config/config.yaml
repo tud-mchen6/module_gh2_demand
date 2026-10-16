@@ -1,6 +1,6 @@
 # A minimal example of how to configure this module
 
-scenario: test-pop-no-change
+# scenario: test-pop-no-change
 
 scenarios:
 
@@ -49,6 +49,22 @@ scenarios:
     non_elec_decarb_in_case_zero: 0.1
     historical_non_elec_decarb: false
     population_ref_year: 2050
+    population_scenario: Medium
+    year_for_IEA_balance: 2023
+
+  pros-hist: # only change TFC per capita and others stay today's level
+    tot_per_capita_TFC: 79
+    historical_per_capita_TFC: false
+    sector_elec_rate_rel: 0.2
+    elec_rate_in_case_zero: 0.1
+    historical_elec_rate: true
+    elec_decarb_rel: 0.2
+    elec_decarb_in_case_zero: 0.3
+    historical_elec_decarb: true
+    non_elec_decarb_rel: 0.2
+    non_elec_decarb_in_case_zero: 0.1
+    historical_non_elec_decarb: true
+    population_ref_year: 2023
     population_scenario: Medium
     year_for_IEA_balance: 2023
 

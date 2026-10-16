@@ -5,23 +5,34 @@ import pandas as pd
 
 configfile: "config/config.yaml"
 
-scenario_name = config["scenario"]
-scenario_config = config["scenarios"][scenario_name]
+def get_scenario_config(wildcards):
+    return config["scenarios"][wildcards.scenario]
 
-# The year to get energy balance or electricity balance data from IEA
-year = scenario_config.get("year_for_IEA_balance", 2023)
-population_scenario = scenario_config["population_scenario"]
+def get_year(wildcards):
+    return get_scenario_config(wildcards).get(
+        "year_for_IEA_balance", 2023
+    )
+
+def get_population_scenario(wildcards):
+    return get_scenario_config(wildcards)["population_scenario"]
+
+# scenario_name = config["scenario"]
+# scenario_config = config["scenarios"][scenario_name]
+
+# # The year to get energy balance or electricity balance data from IEA
+# year = scenario_config.get("year_for_IEA_balance", 2023)
+# population_scenario = scenario_config["population_scenario"]
 
 
 rule download_balances_IEA:
     message:
         "Download the Energy Balances file per country of year {params.year} from IEA."
     params:
-        year=year
+        year=lambda wc: wc.year,
     input:
         country_codes_file=workflow.source_path("../internal/country_codes.csv"),
     output:
-        output_dir=directory("<resources>/automatic/IEA_energy_balances/"),
+        output_dir=directory("<resources>/automatic/IEA_energy_balances/{year}"),
     conda:
         "../envs/shell.yaml"
     script:
@@ -40,11 +51,11 @@ rule download_elec_heat_balances_IEA:
         such as coal.
         """
     params:
-        year=year
+        year=lambda wc: wc.year,
     input:
         country_codes_file=workflow.source_path("../internal/country_codes.csv"),
     output:
-        output_dir=directory("<resources>/automatic/IEA_elec_heat_balances/"),
+        output_dir=directory("<resources>/automatic/IEA_elec_heat_balances/{year}"),
     conda:
         "../envs/shell.yaml"
     script:
