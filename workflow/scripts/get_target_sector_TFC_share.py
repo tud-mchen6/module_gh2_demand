@@ -6,7 +6,7 @@ import os
 def get_target_sector_TFC_share(
     countries: list,
     sector_overwrite_dir: str,
-    historical_per_capita_TFC: str,
+    reference_per_capita_TFC: str,
     reference_sector_TFC_share: str,
     output_file: str,
     TFC_per_capita: str,
@@ -22,7 +22,7 @@ def get_target_sector_TFC_share(
     - countries: list - List of country codes to process, given in ISO3 codes.
     - sector_overwrite_dir: str - Path of the directory to store any user-given
         overwrite files.
-    - historical_per_capita_TFC: str - Path to the historical values of per capita TFC.
+    - reference_per_capita_TFC: str - Path to the historical values of per capita TFC.
     - reference_sector_TFC_share: str - Path to the sectoral share of the
         reference year.
     - output_file: str - Path to save the output file.
@@ -75,7 +75,7 @@ def get_target_sector_TFC_share(
     # Get the current TFC per capita for countries
     TFC_df = pd.read_csv(TFC_per_capita, index_col=0)
     TFC_per_sector = target_df.mul(TFC_df["TFC_per_capita"], axis=0)
-    historical_TFC = pd.read_csv(historical_per_capita_TFC, index_col=0)
+    historical_TFC = pd.read_csv(reference_per_capita_TFC, index_col=0)
     hist_TFC_per_sector = reference_df.mul(historical_TFC["TFC_per_capita"], axis=0)
     # assume 0.9 quantile cutoff to avoid outliers. 0.9 quantile should be sufficient for decent living
     remaining_sectors_limited = ["TOTTRANS", "AGRICULT", "FISHING"]
@@ -144,7 +144,7 @@ if __name__ == "__main__":
     get_target_sector_TFC_share(
         countries=snakemake.params.countries,
         sector_overwrite_dir=snakemake.params.sector_overwrite_dir,
-        historical_per_capita_TFC=snakemake.input.reference_per_capita_TFC,
+        reference_per_capita_TFC=snakemake.input.reference_per_capita_TFC,
         reference_sector_TFC_share=snakemake.input.reference_sector_TFC_share,
         output_file=snakemake.output.output_file,
         TFC_per_capita=snakemake.input.TFC_per_capita,

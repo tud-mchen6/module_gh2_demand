@@ -14,9 +14,7 @@ def scale_or_initialise(entry, relative, init):
 
 def get_target_non_elec_decarb(
     countries: list,
-    use_historical: bool,
-    non_elec_decarb_rel: float,
-    non_elec_decarb_in_case_zero: float,
+    config: dict,
     sector_overwrite_dir: str,
     reference_sector_non_elec_decarb: str,
     output_file: str,
@@ -30,12 +28,7 @@ def get_target_non_elec_decarb(
 
     Parameters:
     - countries: list - List of country codes to process, given in ISO3 codes.
-    - use_historical: bool - Whether to directly use historical values in the
-        reference year.
-    - elec_decarb_rel: float - Decarbonisation of electricity relative (additional) to historical ones
-        in case that hte historical ones are non-zero.
-    - elec_decarb_in_case_zero: float - Decarbonisation of electricity assumed for sectors
-        where historically the rate is zero.
+    - config: dict - User-given configuration of this module.
     - sector_overwrite_dir: str - Path of the directory to store any user-given
         overwrite files.
     - country_specific_overwrite: str - Path of the file that stores country-level overwrites.
@@ -43,6 +36,10 @@ def get_target_non_elec_decarb(
         level of the reference year.
     - output_file: str - Path to save the output file.
     """
+
+    use_historical = config["historical_non_elec_decarb"]
+    non_elec_decarb_rel = config["non_elec_decarb_rel"]
+    non_elec_decarb_in_case_zero = config["non_elec_decarb_in_case_zero"]
 
     # Get the historical reference values
     # sector = 'ELEC_DECARB'
@@ -147,9 +144,7 @@ def get_target_non_elec_decarb(
 if __name__ == "__main__":
     get_target_non_elec_decarb(
         countries=snakemake.params.countries,
-        use_historical=snakemake.params.use_historical,
-        non_elec_decarb_rel=snakemake.params.non_elec_decarb_rel,
-        non_elec_decarb_in_case_zero=snakemake.params.non_elec_decarb_in_case_zero,
+        config=snakemake.params.config,
         sector_overwrite_dir=snakemake.params.sector_overwrite_dir,
         reference_sector_non_elec_decarb=snakemake.input.reference_sector_non_elec_decarb,
         output_file=snakemake.output.output_file,

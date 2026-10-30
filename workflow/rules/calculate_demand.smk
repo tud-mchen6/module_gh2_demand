@@ -23,28 +23,6 @@ def get_population_scenario(wildcards):
     return get_scenario_config(wildcards)["population_scenario"]
 def get_population_ref_year(wildcards):
     return get_scenario_config(wildcards)["population_ref_year"]
-def get_historical_per_capita_TFC(wildcards):
-    return get_scenario_config(wildcards)["historical_per_capita_TFC"]
-def get_tot_per_capita_TFC(wildcards):
-    return get_scenario_config(wildcards)["tot_per_capita_TFC"]
-def get_sector_elec_rate_rel(wildcards):
-    return get_scenario_config(wildcards)["sector_elec_rate_rel"]
-def get_elec_rate_in_case_zero(wildcards):
-    return get_scenario_config(wildcards)["elec_rate_in_case_zero"]
-def get_historical_elec_rate(wildcards):
-    return get_scenario_config(wildcards)["historical_elec_rate"]
-def get_historical_elec_decarb(wildcards):
-    return get_scenario_config(wildcards)["historical_elec_decarb"]
-def get_elec_decarb_rel(wildcards):
-    return get_scenario_config(wildcards)["elec_decarb_rel"]
-def get_elec_decarb_in_case_zero(wildcards):
-    return get_scenario_config(wildcards)["elec_decarb_in_case_zero"]
-def get_non_elec_decarb_rel(wildcards):
-    return get_scenario_config(wildcards)["non_elec_decarb_rel"]
-def get_non_elec_decarb_in_case_zero(wildcards):
-    return get_scenario_config(wildcards)["non_elec_decarb_in_case_zero"]
-def get_historical_non_elec_decarb(wildcards):
-    return get_scenario_config(wildcards)["historical_non_elec_decarb"]
 
 
 rule get_target_TFC_per_capita:
@@ -55,8 +33,7 @@ rule get_target_TFC_per_capita:
         """
     params:
         countries=available_countries,
-        use_historical=get_historical_per_capita_TFC,
-        tot_per_capita_TFC=get_tot_per_capita_TFC,
+        config=lambda wildcards: config["scenarios"][f"{wildcards.scenario}"],
     input:
         # TODO: in the integrated workflow, this file needs to be manually put there - write in README
         country_overwrite="<resources>/user/country_level_overwrite.csv",
@@ -79,7 +56,6 @@ rule get_target_sector_TFC_share:
         """
     params:
         countries=available_countries,
-        ref_year=get_population_ref_year,
         sector_overwrite_dir="<resources>/user/sector_level_overwrite",
     input:
         country_overwrite="<resources>/user/country_level_overwrite.csv",
@@ -109,11 +85,8 @@ rule get_target_elec_rate_by_sector:
         """
     params:
         countries=available_countries,
-        ref_year=get_population_ref_year,
+        config=lambda wildcards: config["scenarios"][f"{wildcards.scenario}"],
         sector_overwrite_dir="<resources>/user/sector_level_overwrite",
-        sector_elec_rate_rel=get_sector_elec_rate_rel,
-        elec_rate_in_case_zero=get_elec_rate_in_case_zero,
-        use_historical=get_historical_elec_rate,
     input:
         country_overwrite="<resources>/user/country_level_overwrite.csv",
         reference_sector_elec_rate=lambda wc: (
@@ -138,11 +111,8 @@ rule get_target_elec_decarb:
         """
     params:
         countries=available_countries,
-        ref_year=get_population_ref_year,
+        config=lambda wildcards: config["scenarios"][f"{wildcards.scenario}"],
         sector_overwrite_dir="<resources>/user/sector_level_overwrite",
-        elec_decarb_rel=get_elec_decarb_rel,
-        elec_decarb_in_case_zero=get_elec_decarb_in_case_zero,
-        use_historical=get_historical_elec_decarb,
     input:
         country_overwrite="<resources>/user/country_level_overwrite.csv",
         reference_sector_elec_decarb=lambda wc: (
@@ -167,11 +137,8 @@ rule get_target_non_elec_decarb:
         """
     params:
         countries=available_countries,
-        ref_year=get_population_ref_year,
+        config=lambda wildcards: config["scenarios"][f"{wildcards.scenario}"],
         sector_overwrite_dir="<resources>/user/sector_level_overwrite",
-        non_elec_decarb_rel=get_non_elec_decarb_rel,
-        non_elec_decarb_in_case_zero=get_non_elec_decarb_in_case_zero,
-        use_historical=get_historical_non_elec_decarb,
     input:
         country_overwrite="<resources>/user/country_level_overwrite.csv",
         reference_sector_non_elec_decarb=lambda wc: (

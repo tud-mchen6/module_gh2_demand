@@ -3,9 +3,8 @@ import os
 
 
 def get_target_TFC_per_capita(
-    use_historical_per_capita_TFC: bool,
-    historical_per_capita_TFC: str,
-    tot_per_capita_TFC: float,
+    reference_per_capita_TFC: str,
+    config: dict,
     country_overwrite: str,
     output_file: str,
 ):
@@ -13,14 +12,15 @@ def get_target_TFC_per_capita(
     Get the target TFC per capita for each country. If needed, processed IEA data can be used for reference.
 
     Parameters:
-    - use_historical_per_capita_TFC: bool - Whether to use historical values of per capita total final consumption for each country.
-    - historical_per_capita_TFC: str - Path to the historical values of per capita TFC in case needed.
-    - tot_per_capita_TFC: float - User-given universal default per capita total final energy consumption for all countries. Given in config. Unit: GJ/year/capita.
+    - reference_per_capita_TFC: str - Path to the historical values of per capita TFC in case needed.
+    - config: dict - User-given configurations.
     - country_overwrite: str - User-given overwrites of country-specific data, specifically TFC per capita for this script.
     - output_file: str - Path to save the processed one CSV file.
     """
 
-    historical_TFC_df = pd.read_csv(historical_per_capita_TFC, index_col=0)
+    use_historical_per_capita_TFC = config["historical_per_capita_TFC"]
+    tot_per_capita_TFC = config["tot_per_capita_TFC"]
+    historical_TFC_df = pd.read_csv(reference_per_capita_TFC, index_col=0)
     if use_historical_per_capita_TFC:
         TFC_df = historical_TFC_df
     else:
@@ -46,9 +46,8 @@ def get_target_TFC_per_capita(
 
 if __name__ == "__main__":
     get_target_TFC_per_capita(
-        use_historical_per_capita_TFC=snakemake.params.use_historical,
-        historical_per_capita_TFC=snakemake.input.reference_per_capita_TFC,
-        tot_per_capita_TFC=snakemake.params.tot_per_capita_TFC,
+        reference_per_capita_TFC=snakemake.input.reference_per_capita_TFC,
+        config=snakemake.params.config,
         country_overwrite=snakemake.input.country_overwrite,
         output_file=snakemake.output.output_file,
     )

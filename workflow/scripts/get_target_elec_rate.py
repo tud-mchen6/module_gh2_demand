@@ -12,9 +12,7 @@ def scale_or_initialise(entry, relative, init):
 
 def get_target_elec_rate(
     countries: list,
-    use_historical: bool,
-    sector_elec_rate_rel: float,
-    elec_rate_in_case_zero: float,
+    config: dict,
     sector_overwrite_dir: str,
     reference_sector_elec_rate: str,
     output_file: str,
@@ -28,12 +26,7 @@ def get_target_elec_rate(
 
     Parameters:
     - countries: list - List of country codes to process, given in ISO3 codes.
-    - use_historical: bool - Whether to directly use historical values in the
-        reference year.
-    - sector_elec_rate_rel: float - Electrification rate relative (additional) to historical ones
-        in case that hte historical ones are non-zero.
-    - elec_rate_in_case_zero: float - Electrificaiton rate assumed for sectors where
-        historically the rate is zero.
+    - config: dict - User-given configurations of the module.
     - sector_overwrite_dir: str - Path of the directory to store any user-given
         overwrite files.
     - country_specific_overwrite: str - Path of the file that stores country-level overwrites.
@@ -41,6 +34,11 @@ def get_target_elec_rate(
         reference year.
     - output_file: str - Path to save the output file.
     """
+
+    # Get the parameters within config
+    use_historical = config["historical_elec_rate"]
+    sector_elec_rate_rel = config["sector_elec_rate_rel"]
+    elec_rate_in_case_zero = config["elec_rate_in_case_zero"]
 
     # Get the historical reference values
     reference_df = pd.read_csv(reference_sector_elec_rate, index_col=0)
@@ -146,9 +144,7 @@ def get_target_elec_rate(
 if __name__ == "__main__":
     get_target_elec_rate(
         countries=snakemake.params.countries,
-        use_historical=snakemake.params.use_historical,
-        sector_elec_rate_rel=snakemake.params.sector_elec_rate_rel,
-        elec_rate_in_case_zero=snakemake.params.elec_rate_in_case_zero,
+        config=snakemake.params.config,
         sector_overwrite_dir=snakemake.params.sector_overwrite_dir,
         reference_sector_elec_rate=snakemake.input.reference_sector_elec_rate,
         output_file=snakemake.output.output_file,

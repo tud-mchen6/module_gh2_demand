@@ -5,11 +5,6 @@ type: object
 additionalProperties: false
 
 properties:
-  # scenario:
-  #   description: The selected scenario for the calculation.
-  #   type: string
-  #   pattern: "^[A-Za-z0-9_-]+$"
-  #   minLength: 1
   scenarios:
     description: Scenarios for which to calculate electricity and hydrogen demand.
     type: object
@@ -20,9 +15,6 @@ properties:
     additionalProperties: false
 
 $defs:
-  # scenario:
-  #   type: object
-  #   additionalProperties: false
   scenarios:
     type: object
     properties:
@@ -51,7 +43,7 @@ $defs:
       elec_decarb_rel:
         description: The addition of electricity target decarbonisation level for all sectors compared to the reference.
         type: number
-        minimum: 0.1
+        minimum: 0.01
 
       elec_decarb_in_case_zero:
         description: The electricity decarbonisation level assumed in case the reference value is zero.
@@ -65,7 +57,7 @@ $defs:
       non_elec_decarb_rel:
         description: The addition of non-electricity target decarbonisation level for all sectors compared to the reference.
         type: number
-        minimum: 0.1
+        minimum: 0.01
 
       non_elec_decarb_in_case_zero:
         description: The non-electricity decarbonisation level assumed in case the reference value is zero.
@@ -87,5 +79,5 @@ $defs:
       year_for_IEA_balance:
         description: Year for which to download the IEA energy balances; latest and the default is 2023 for now.
         type: integer
-        minimum: 2000
+        minimum: 2023
 

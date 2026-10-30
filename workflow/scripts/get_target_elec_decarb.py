@@ -16,9 +16,7 @@ def scale_or_initialise(entry, relative, init):
 
 def get_target_elec_decarb(
     countries: list,
-    use_historical: bool,
-    elec_decarb_rel: float,
-    elec_decarb_in_case_zero: float,
+    config: dict,
     sector_overwrite_dir: str,
     reference_sector_elec_decarb: str,
     output_file: str,
@@ -32,12 +30,7 @@ def get_target_elec_decarb(
 
     Parameters:
     - countries: list - List of country codes to process, given in ISO3 codes.
-    - use_historical: bool - Whether to directly use historical values in the
-        reference year.
-    - elec_decarb_rel: float - Decarbonisation of electricity relative (additional) to historical ones
-        in case that hte historical ones are non-zero.
-    - elec_decarb_in_case_zero: float - Decarbonisation of electricity assumed for sectors
-        where historically the rate is zero.
+    - config: dict - User-given configuration of this module.
     - sector_overwrite_dir: str - Path of the directory to store any user-given
         overwrite files.
     - country_specific_overwrite: str - Path of the file that stores country-level overwrites.
@@ -61,6 +54,10 @@ def get_target_elec_decarb(
     reference = pd.read_csv(reference_sector_elec_decarb, index_col=0)[[sector]]
     reference_df = pd.DataFrame(columns=sectors, index=reference.index)
     reference_df[:] = reference.values
+
+    use_historical = config["historical_elec_decarb"]
+    elec_decarb_rel = config["elec_decarb_rel"]
+    elec_decarb_in_case_zero = config["elec_decarb_in_case_zero"]
 
     if not use_historical:
         target_df = reference_df.copy().map(
@@ -157,9 +154,7 @@ def get_target_elec_decarb(
 if __name__ == "__main__":
     get_target_elec_decarb(
         countries=snakemake.params.countries,
-        use_historical=snakemake.params.use_historical,
-        elec_decarb_rel=snakemake.params.elec_decarb_rel,
-        elec_decarb_in_case_zero=snakemake.params.elec_decarb_in_case_zero,
+        config=snakemake.params.config,
         sector_overwrite_dir=snakemake.params.sector_overwrite_dir,
         country_specific_overwrite=snakemake.input.country_overwrite,
         reference_sector_elec_decarb=snakemake.input.reference_sector_elec_decarb,
