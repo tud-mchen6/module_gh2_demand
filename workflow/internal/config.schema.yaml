@@ -1,6 +1,8 @@
 
 $schema: "https://json-schema.org/draft/2020-12/schema"
+
 description: "Schema for user-provided configuration files."
+
 type: object
 additionalProperties: false
 
@@ -15,7 +17,9 @@ properties:
     additionalProperties: false
 
 $defs:
-  scenarios:
+
+  # Shared parameter definitions
+  scenario_parameters:
     type: object
     properties:
       tot_per_capita_TFC:
@@ -81,3 +85,25 @@ $defs:
         type: integer
         minimum: 2023
 
+  # Scenario defaults plus optional country-specific overrides
+  scenarios:
+    type: object
+    allOf:
+      - $ref: "#/$defs/scenario_parameters"
+
+      - type: object
+        properties:
+          overrides:
+            description: Country-specific overrides of scenario parameters.
+            type: object
+            patternProperties:
+              "^[A-Z]{3}$":
+                allOf:
+                  - $ref: "#/$defs/scenario_parameters"
+                  - type: object
+                    propertyNames:
+                      pattern: "^(tot_per_capita_TFC|historical_per_capita_TFC|sector_elec_rate_rel|elec_rate_in_case_zero|historical_elec_rate|elec_decarb_rel|elec_decarb_in_case_zero|historical_elec_decarb|non_elec_decarb_rel|non_elec_decarb_in_case_zero|historical_non_elec_decarb|population_ref_year|population_scenario|year_for_IEA_balance)$"
+            additionalProperties: false
+
+        propertyNames:
+          pattern: "^(tot_per_capita_TFC|historical_per_capita_TFC|sector_elec_rate_rel|elec_rate_in_case_zero|historical_elec_rate|elec_decarb_rel|elec_decarb_in_case_zero|historical_elec_decarb|non_elec_decarb_rel|non_elec_decarb_in_case_zero|historical_non_elec_decarb|population_ref_year|population_scenario|year_for_IEA_balance|overrides)$"
