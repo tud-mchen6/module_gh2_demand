@@ -35,8 +35,6 @@ rule get_target_TFC_per_capita:
         countries=available_countries,
         config=lambda wildcards: config["scenarios"][f"{wildcards.scenario}"],
     input:
-        # TODO: in the integrated workflow, this file needs to be manually put there - write in README
-        country_overwrite="<resources>/user/country_level_overwrite.csv",
         reference_per_capita_TFC=lambda wc: (
             f"<resources>/processed/IEA_historical_per_capita_TFC_{get_year(wc)}.csv"
         )
@@ -58,7 +56,6 @@ rule get_target_sector_TFC_share:
         countries=available_countries,
         sector_overwrite_dir="<resources>/user/sector_level_overwrite",
     input:
-        country_overwrite="<resources>/user/country_level_overwrite.csv",
         TFC_per_capita="<resources>/prepare/target_per_capita_TFC_{scenario}.csv",
         reference_sector_TFC_share=lambda wc: (
             f"<resources>/processed/IEA_historical_sector_TFC_share_{get_year(wc)}.csv"
@@ -88,7 +85,6 @@ rule get_target_elec_rate_by_sector:
         config=lambda wildcards: config["scenarios"][f"{wildcards.scenario}"],
         sector_overwrite_dir="<resources>/user/sector_level_overwrite",
     input:
-        country_overwrite="<resources>/user/country_level_overwrite.csv",
         reference_sector_elec_rate=lambda wc: (
             f"<resources>/processed/IEA_historical_sector_electrification_{get_year(wc)}.csv"
         )
@@ -114,7 +110,6 @@ rule get_target_elec_decarb:
         config=lambda wildcards: config["scenarios"][f"{wildcards.scenario}"],
         sector_overwrite_dir="<resources>/user/sector_level_overwrite",
     input:
-        country_overwrite="<resources>/user/country_level_overwrite.csv",
         reference_sector_elec_decarb=lambda wc: (
             f"<resources>/processed/IEA_historical_elec_decarb_{get_year(wc)}.csv"
         )
@@ -140,7 +135,6 @@ rule get_target_non_elec_decarb:
         config=lambda wildcards: config["scenarios"][f"{wildcards.scenario}"],
         sector_overwrite_dir="<resources>/user/sector_level_overwrite",
     input:
-        country_overwrite="<resources>/user/country_level_overwrite.csv",
         reference_sector_non_elec_decarb=lambda wc: (
             f"<resources>/processed/IEA_historical_non_elec_decarb_{get_year(wc)}.csv"
         )

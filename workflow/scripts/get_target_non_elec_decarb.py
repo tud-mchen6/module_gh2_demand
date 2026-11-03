@@ -18,7 +18,6 @@ def get_target_non_elec_decarb(
     sector_overwrite_dir: str,
     reference_sector_non_elec_decarb: str,
     output_file: str,
-    country_specific_overwrite: str = None,
 ):
     """
     Get the target decarbonisation level for non-electricity for each country,
@@ -31,7 +30,6 @@ def get_target_non_elec_decarb(
     - config: dict - User-given configuration of this module.
     - sector_overwrite_dir: str - Path of the directory to store any user-given
         overwrite files.
-    - country_specific_overwrite: str - Path of the file that stores country-level overwrites.
     - reference_sector_non_elec_decarb: str - Path to the non-electricity decarbonisation
         level of the reference year.
     - output_file: str - Path to save the output file.
@@ -52,37 +50,21 @@ def get_target_non_elec_decarb(
         )
 
         # Get all country specific overwrites (low priority, higher than config default)
-        if country_specific_overwrite is not None:
-            country_level_overwrite_df = pd.read_csv(
-                country_specific_overwrite, index_col=0
-            )
-            for country in list(country_level_overwrite_df.index):
-                # Users could choose to determine directly an absolute decarbonisation level,
-                # or to define a relative increase compared to the current value, that is different
-                # from that defined in config. But these two cannot exist at the same time.
-                abs = country_level_overwrite_df.loc[country, "non_elec_decarb_abs"]
-                rel = country_level_overwrite_df.loc[country, "non_elec_decarb_rel"]
-                if pd.notna(abs) and pd.notna(rel):
-                    print(
-                        "Input error: relative values and absolute values cannot be given at the same time for "
-                        "non-electricity decarbonisation level."
+        if "overrides" in config and config["overrides"] is not None:
+            for country, country_config in config["overrides"].items():
+                if "non_elec_decarb_rel" in country_config:
+                    non_elec_decarb_rel = country_config.get(
+                        "non_elec_decarb_rel", None
                     )
-                elif pd.notna(abs):
-                    target_df.loc[country] = abs
-                    for sector in list(reference_df.columns):
-                        if reference_df.at[country, sector] > abs:
-                            print(
-                                "Input warning: given non-electricity decarbonisation level lower than historical value"
-                                f" in {sector} sector in {country}."
-                            )
-                elif pd.notna(rel):
-                    target_df.loc[country] = reference_df.loc[country].apply(
-                        lambda x: scale_or_initialise(
-                            x, rel, non_elec_decarb_in_case_zero
-                        )
+                if "non_elec_decarb_in_case_zero" in country_config:
+                    non_elec_decarb_in_case_zero = country_config.get(
+                        "non_elec_decarb_in_case_zero", None
                     )
-                else:
-                    continue
+                target_df.loc[country] = reference_df.loc[country].apply(
+                    lambda x: scale_or_initialise(
+                        x, non_elec_decarb_rel, non_elec_decarb_in_case_zero
+                    )
+                )
 
         # Get all sector specific overwrites (highest priority)
         all_files = glob.glob(os.path.join(sector_overwrite_dir, "*.csv"))
@@ -148,5 +130,4 @@ if __name__ == "__main__":
         sector_overwrite_dir=snakemake.params.sector_overwrite_dir,
         reference_sector_non_elec_decarb=snakemake.input.reference_sector_non_elec_decarb,
         output_file=snakemake.output.output_file,
-        country_specific_overwrite=snakemake.input.country_overwrite,
     )

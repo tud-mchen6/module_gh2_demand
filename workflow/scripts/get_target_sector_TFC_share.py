@@ -10,7 +10,6 @@ def get_target_sector_TFC_share(
     reference_sector_TFC_share: str,
     output_file: str,
     TFC_per_capita: str,
-    country_overwrite: str,
 ):
     """
     Get the target sectoral share in total final consumption for each country,
@@ -20,14 +19,13 @@ def get_target_sector_TFC_share(
 
     Parameters:
     - countries: list - List of country codes to process, given in ISO3 codes.
-    - sector_overwrite_dir: str - Path of the directory to store any user-given
-        overwrite files.
+    - sector_overwrite_dir: str - Path to the directory containing the sectoral
+        share overwrites for each country.
     - reference_per_capita_TFC: str - Path to the historical values of per capita TFC.
     - reference_sector_TFC_share: str - Path to the sectoral share of the
         reference year.
     - output_file: str - Path to save the output file.
     - TFC_per_capita: str - Path to the target per capita total final consumption data.
-    - country_overwrite: str - User-given overwrites of country-specific data.
     """
 
     # Get the historical reference values
@@ -148,5 +146,4 @@ if __name__ == "__main__":
         reference_sector_TFC_share=snakemake.input.reference_sector_TFC_share,
         output_file=snakemake.output.output_file,
         TFC_per_capita=snakemake.input.TFC_per_capita,
-        country_overwrite=snakemake.input.country_overwrite,
     )
