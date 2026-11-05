@@ -15,6 +15,9 @@ def get_target_elec_rate(
     config: dict,
     sector_overwrite_dir: str,
     reference_sector_elec_rate: str,
+    TFC_per_capita: str,
+    sector_TFC_share: str,
+    TFC_per_capita_adjusted: str,
     output_file: str,
 ):
     """
@@ -30,6 +33,9 @@ def get_target_elec_rate(
         overwrite files.
     - reference_sector_elec_rate: str - Path to the sectoral electrification rate of the
         reference year.
+    - TFC_per_capita: str - Path to the total final consumption per capita file.
+    - sector_TFC_share: str - Path to the sectoral share of total final consumption file.
+    - TFC_per_capita_adjusted: str - Path to the adjusted total final consumption per capita file.
     - output_file: str - Path to save the output file.
     """
 
@@ -124,6 +130,40 @@ def get_target_elec_rate(
     # Output the file
     target_df.to_csv(output_file)
 
+    # Adjust the total TFC based on the electrification assumptions
+    eff_increase = config["elec_eff_increase_non_industry"]
+    sector_TFC_share_df = pd.read_csv(sector_TFC_share, index_col=0)
+    TFC_per_capita_df = pd.read_csv(TFC_per_capita, index_col=0)
+    TFC_per_capita_sector_adjusted = sector_TFC_share_df.multiply(
+        TFC_per_capita_df["TFC_per_capita"], axis=0
+    )
+    for country in target_df.index:
+        # Get the country-specific overrides if exist
+        country_params = (
+            config["overrides"][country]
+            if "overrides" in config and country in config["overrides"]
+            else {}
+        )
+        eff_increase = country_params.get(
+            "elec_eff_increase_non_industry", config["elec_eff_increase_non_industry"]
+        )
+        # Iterate over each sector within a country
+        for sector in target_df.columns:
+            # Get the electrification rate gain
+            sector_elec_rate_rel = (
+                target_df.at[country, sector] - reference_df.at[country, sector]
+            )
+            # It's difficult to define efficiency gain in the industry sector compared to e.g. transport and residential
+            if (
+                sector != "TOTIND"
+            ):  # Calculation formula: based on the assumption that useful energy does not change
+                TFC_per_capita_sector_adjusted.at[country, sector] = (
+                    TFC_per_capita_sector_adjusted.at[country, sector]
+                    * (1 + reference_df.at[country, sector] * (eff_increase - 1))
+                    / (1 + target_df.at[country, sector] * (eff_increase - 1))
+                ).round(4)
+    TFC_per_capita_sector_adjusted.to_csv(TFC_per_capita_adjusted)
+
 
 if __name__ == "__main__":
     get_target_elec_rate(
@@ -131,5 +171,8 @@ if __name__ == "__main__":
         config=snakemake.params.config,
         sector_overwrite_dir=snakemake.params.sector_overwrite_dir,
         reference_sector_elec_rate=snakemake.input.reference_sector_elec_rate,
+        TFC_per_capita=snakemake.input.TFC_per_capita,
+        sector_TFC_share=snakemake.input.sector_TFC_share,
+        TFC_per_capita_adjusted=snakemake.output.TFC_per_capita_adjusted,
         output_file=snakemake.output.output_file,
     )

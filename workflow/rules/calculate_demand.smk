@@ -87,8 +87,11 @@ rule get_target_elec_rate_by_sector:
     input:
         reference_sector_elec_rate=lambda wc: (
             f"<resources>/processed/IEA_historical_sector_electrification_{get_year(wc)}.csv"
-        )
+        ),
+        TFC_per_capita="<resources>/prepare/target_per_capita_TFC_{scenario}.csv",
+        sector_TFC_share="<resources>/prepare/target_sector_TFC_share_{scenario}.csv",
     output:
+        TFC_per_capita_adjusted="<resources>/prepare/adjusted_target_per_capita_TFC_{scenario}.csv",
         output_file="<resources>/prepare/target_sector_elec_rate_{scenario}.csv"
     conda:
         "../envs/default.yaml"
@@ -152,7 +155,7 @@ rule calculate_vRES_demand:
         Calculate electricity demand met by vRES for all considered countries.
         """
     input:
-        TFC_per_capita="<resources>/prepare/target_per_capita_TFC_{scenario}.csv",
+        TFC_per_capita="<resources>/prepare/adjusted_target_per_capita_TFC_{scenario}.csv",
         sector_TFC_share="<resources>/prepare/target_sector_TFC_share_{scenario}.csv",
         sector_electrification="<resources>/prepare/target_sector_elec_rate_{scenario}.csv",
         sector_elec_decarb="<resources>/prepare/target_elec_decarb_{scenario}.csv",
@@ -173,7 +176,7 @@ rule calculate_GH2_demand:
         Calculate green hydrogen demand for all considered countries.
         """
     input:
-        TFC_per_capita="<resources>/prepare/target_per_capita_TFC_{scenario}.csv",
+        TFC_per_capita="<resources>/prepare/adjusted_target_per_capita_TFC_{scenario}.csv",
         sector_TFC_share="<resources>/prepare/target_sector_TFC_share_{scenario}.csv",
         sector_electrification="<resources>/prepare/target_sector_elec_rate_{scenario}.csv",
         sector_non_elec_decarb="<resources>/prepare/target_non_elec_decarb_{scenario}.csv",

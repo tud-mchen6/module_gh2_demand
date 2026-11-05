@@ -44,6 +44,11 @@ $defs:
         description: Whether to use historical reference value of electrification rate for each sector in each country. If yes, all user-input values in this regard are invalid.
         type: boolean
 
+      elec_eff_increase_non_industry:
+        description: The assumed efficiency increase with electricity compared to fuels (for non-industry sectors; electricity efficiency divided by non-electricity efficiency).
+        type: number
+        minimum: 0
+
       elec_decarb_rel:
         description: The addition of electricity target decarbonisation level for all sectors compared to the reference.
         type: number
@@ -102,8 +107,8 @@ $defs:
                   - $ref: "#/$defs/scenario_parameters"
                   - type: object
                     propertyNames:
-                      pattern: "^(tot_per_capita_TFC|historical_per_capita_TFC|sector_elec_rate_rel|elec_rate_in_case_zero|historical_elec_rate|elec_decarb_rel|elec_decarb_in_case_zero|historical_elec_decarb|non_elec_decarb_rel|non_elec_decarb_in_case_zero|historical_non_elec_decarb|population_ref_year|population_scenario|year_for_IEA_balance)$"
+                      pattern: "^(tot_per_capita_TFC|historical_per_capita_TFC|sector_elec_rate_rel|elec_rate_in_case_zero|historical_elec_rate|elec_eff_increase_non_industry|elec_decarb_rel|elec_decarb_in_case_zero|historical_elec_decarb|non_elec_decarb_rel|non_elec_decarb_in_case_zero|historical_non_elec_decarb|population_ref_year|population_scenario|year_for_IEA_balance)$"
             additionalProperties: false
 
         propertyNames:
-          pattern: "^(tot_per_capita_TFC|historical_per_capita_TFC|sector_elec_rate_rel|elec_rate_in_case_zero|historical_elec_rate|elec_decarb_rel|elec_decarb_in_case_zero|historical_elec_decarb|non_elec_decarb_rel|non_elec_decarb_in_case_zero|historical_non_elec_decarb|population_ref_year|population_scenario|year_for_IEA_balance|overrides)$"
+          pattern: "^(tot_per_capita_TFC|historical_per_capita_TFC|sector_elec_rate_rel|elec_rate_in_case_zero|historical_elec_rate|elec_eff_increase_non_industry|elec_decarb_rel|elec_decarb_in_case_zero|historical_elec_decarb|non_elec_decarb_rel|non_elec_decarb_in_case_zero|historical_non_elec_decarb|population_ref_year|population_scenario|year_for_IEA_balance|overrides)$"
