@@ -1,13 +1,7 @@
-[project]
+[workspace]
 name = "module_gh2_demand"
 authors = ["See AUTHORS file"]
-description = "This module helps producing the demand number for electricity
-    demand met by variable Renewable Energy Sources and green hydrogen demand based
-    on assumptions of per capita total final energy use, sectoral electrification
-    and decarbonisation level, and population of each country. It uses a top-down
-    approach and allows different outputs with changing assumptions. For countries
-    included in the Energy Statistics Data Browser, the assumptions can be based on
-    today's data as a reference."
+description = "This module helps producing the demand number for electricity demand met by variable Renewable Energy Sources and green hydrogen demand based on assumptions of per capita total final energy use, sectoral electrification and decarbonisation level, and population of each country. It uses a top-down approach and allows different outputs with changing assumptions. For countries included in the Energy Statistics Data Browser, the assumptions can be based on today's data as a reference."
 license = "Apache-2.0"
 readme = "README.md"
 channels = ["conda-forge", "bioconda"]
