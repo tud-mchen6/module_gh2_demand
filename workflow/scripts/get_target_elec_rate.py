@@ -162,6 +162,12 @@ def get_target_elec_rate(
                     * (1 + reference_df.at[country, sector] * (eff_increase - 1))
                     / (1 + target_df.at[country, sector] * (eff_increase - 1))
                 ).round(4)
+    TFC_per_capita_sector_adjusted = TFC_per_capita_sector_adjusted.sort_index().round(
+        4
+    )
+    TFC_per_capita_sector_adjusted["TFC_per_capita"] = (
+        TFC_per_capita_sector_adjusted.sum(axis=1)
+    )
     TFC_per_capita_sector_adjusted.to_csv(TFC_per_capita_adjusted)
 
 
