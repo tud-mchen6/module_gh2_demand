@@ -1,0 +1,144 @@
+import pandas as pd
+import glob
+import os
+
+
+def scale_or_initialise(entry, relative, init):
+    """
+    Scale the entry by a relative factor, unless the entry is zero,
+    in which case return the initialisation value.
+    """
+    if entry > 0:
+        return min(relative + entry, 1)
+    else:
+        return init
+
+
+def get_target_elec_decarb(
+    countries: list,
+    config: dict,
+    sector_overwrite_dir: str,
+    reference_sector_elec_decarb: str,
+    output_file: str,
+):
+    """
+    Get the target decarbonisation level for electricity for each country,
+    accounting for all overwrites, prepared for the final calculation.
+    The default is to use the referenced historical valuefor each country, unless
+    explicitly specified by the user.
+
+    Parameters:
+    - countries: list - List of country codes to process, given in ISO3 codes.
+    - config: dict - User-given configuration of this module.
+    - sector_overwrite_dir: str - Path of the directory to store any user-given
+        overwrite files.
+    - reference_sector_elec_decarb: str - Path to the sectoral electrification rate of the
+        reference year.
+    - output_file: str - Path to save the output file.
+    """
+
+    # Apply the config default values
+    sector = "ELEC_DECARB"
+    sectors = [
+        "TOTIND",
+        "TOTTRANS",
+        "RESIDENT",
+        "COMMPUB",
+        "AGRICULT",
+        "FISHING",
+        "ONONSPEC",
+        "NONENUSE",
+    ]
+    reference = pd.read_csv(reference_sector_elec_decarb, index_col=0)[[sector]]
+    reference_df = pd.DataFrame(columns=sectors, index=reference.index)
+    reference_df[:] = reference.values
+
+    use_historical = config["historical_elec_decarb"]
+    elec_decarb_rel = config["elec_decarb_rel"]
+    elec_decarb_in_case_zero = config["elec_decarb_in_case_zero"]
+
+    if not use_historical:
+        target_df = reference_df.copy().map(
+            lambda x: scale_or_initialise(x, elec_decarb_rel, elec_decarb_in_case_zero)
+        )
+
+        # Get all country specific overwrites (low priority, higher than config default)
+        if "overrides" in config and config["overrides"] is not None:
+            for country, country_config in config["overrides"].items():
+                if "elec_decarb_rel" in country_config:
+                    elec_decarb_rel = country_config.get("elec_decarb_rel", None)
+                if "elec_decarb_in_case_zero" in country_config:
+                    elec_decarb_in_case_zero = country_config.get(
+                        "elec_decarb_in_case_zero", None
+                    )
+                target_df.loc[country] = reference_df.loc[country].apply(
+                    lambda x: scale_or_initialise(
+                        x, elec_decarb_rel, elec_decarb_in_case_zero
+                    )
+                )
+
+        # Get all sector specific overwrites (highest priority)
+        all_files = glob.glob(os.path.join(sector_overwrite_dir, "*.csv"))
+        for file in all_files:
+            # Only get the ones with the naming convention; hard-coded
+            file_name = (
+                file.replace(sector_overwrite_dir, "")
+                .replace(".csv", "")
+                .replace("\\", "")
+            )
+            if "sectorShare" in file_name:
+                country = file_name.split("_")[-1]
+                # Only get the ones where country is within the countries list
+                if country in countries:
+                    country_sector_specific_overwrite = pd.read_csv(file, index_col=0)
+                    # Check if the value that the user gives is coherent. If not,
+                    # fall back to the default
+                    for sector in list(country_sector_specific_overwrite.index):
+                        abs = country_sector_specific_overwrite.loc[
+                            sector, "elec_decarb_abs"
+                        ]
+                        rel = country_sector_specific_overwrite.loc[
+                            sector, "elec_decarb_rel"
+                        ]
+                        if pd.notna(abs) and pd.notna(rel):
+                            print(
+                                "Input error: relative values and absolute values cannot be given at the same time for "
+                                "electricity decarbonisation level."
+                            )
+                        elif pd.notna(abs):
+                            target_df.at[country, sector] = abs
+                            if reference_df.at[country, sector] > abs:
+                                print(
+                                    "Input warning: given electricity decarbonisation level lower than historical value"
+                                    f" in {sector} sector in {country}."
+                                )
+                        elif pd.notna(rel):
+                            target_df.at[country, sector] = scale_or_initialise(
+                                reference_df.at[country, sector],
+                                rel,
+                                elec_decarb_in_case_zero,
+                            )
+                        else:
+                            continue
+                elif country == "template":
+                    continue
+                else:
+                    print(
+                        "Input error: given country not present in analysed countries."
+                    )
+        target_df = target_df.sort_index().round(4)
+    else:
+        target_df = reference_df
+
+    # Output the file
+    target_df.to_csv(output_file)
+
+
+if __name__ == "__main__":
+    get_target_elec_decarb(
+        countries=snakemake.params.countries,
+        config=snakemake.params.config,
+        sector_overwrite_dir=snakemake.params.sector_overwrite_dir,
+        reference_sector_elec_decarb=snakemake.input.reference_sector_elec_decarb,
+        output_file=snakemake.output.output_file,
+    )
