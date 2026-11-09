@@ -164,6 +164,8 @@ rule calculate_vRES_demand:
         population=lambda wc: (f"<resources>/processed/population_{get_population_scenario(wc)}_{get_population_ref_year(wc)}.csv"),
     output:
         output_file="<results>/demand/demand_vRES_{scenario}.csv",
+    log:
+        "<logs>/demand_vRES_{scenario}.log"
     conda:
         "../envs/default.yaml"
     script:
@@ -186,5 +188,7 @@ rule calculate_GH2_demand:
         "../envs/default.yaml"
     output:
         output_file="<results>/demand/demand_GH2_{scenario}.csv",
+    log:
+        "<logs>/demand_GH2_{scenario}.log"
     script:
         "../scripts/calculate_demand_GH2.py"
