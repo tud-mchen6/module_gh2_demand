@@ -36,7 +36,7 @@ def get_countries_non_elec_renew_consum(
             country = file.split("_")[-2]
             df = pd.read_csv(file)
             df_select = df[
-                (df["year"] == year)
+                (df["year"] == int(year))
                 & (df["product"].isin(product_list))
                 & (df["flow"] == "TFC")
             ]

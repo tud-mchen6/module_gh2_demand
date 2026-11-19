@@ -42,6 +42,7 @@ def process_countries_heat_decarb(input_dir: str, countries, output_file: str, y
 
     # Iterate over countries
     input_path = Path(input_dir)
+    year = int(year)
     files = [str(file) for file in input_path.iterdir() if file.is_file()]
     for file in files:
         if (str(year) in file) & (file.split("_")[-2] in countries):
