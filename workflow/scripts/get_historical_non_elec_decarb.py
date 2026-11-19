@@ -56,7 +56,7 @@ def process_countries_non_elec_decarb(
         if (str(year) in file) & (file.split("_")[-2] in countries):
             country = file.split("_")[-2]
             df = pd.read_csv(file)
-            df_year = df[df["year"] == year]
+            df_year = df[df["year"] == int(year)]
             # Iterate over sectors
             flows = df_year["flow"].unique()
             for sector in list_sectors:
