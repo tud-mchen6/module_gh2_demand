@@ -81,14 +81,13 @@ rule get_target_elec_rate_by_sector:
         the global value defined in config.
         """
     params:
-        countries=available_countries,
         config=lambda wildcards: config["scenarios"][f"{wildcards.scenario}"],
-        sector_overwrite_dir="<resources>/user/sector_level_overwrite",
     input:
         reference_sector_elec_rate=lambda wc: (
             f"<resources>/processed/IEA_historical_sector_electrification_{get_year(wc)}.csv"
         ),
         TFC_per_capita="<resources>/prepare/target_per_capita_TFC_{scenario}.csv",
+        sector_overwrite_dir="<resources>/user/sector_level_overwrite_{scenario}",
         sector_TFC_share="<resources>/prepare/target_sector_TFC_share_{scenario}.csv",
     output:
         TFC_per_capita_adjusted="<resources>/prepare/adjusted_target_per_capita_TFC_{scenario}.csv",

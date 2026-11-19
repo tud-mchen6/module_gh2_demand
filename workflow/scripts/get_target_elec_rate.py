@@ -11,7 +11,6 @@ def scale_or_initialise(entry, relative, init):
 
 
 def get_target_elec_rate(
-    countries: list,
     config: dict,
     sector_overwrite_dir: str,
     reference_sector_elec_rate: str,
@@ -27,7 +26,6 @@ def get_target_elec_rate(
     explicitly specified by the user.
 
     Parameters:
-    - countries: list - List of country codes to process, given in ISO3 codes.
     - config: dict - User-given configurations of the module.
     - sector_overwrite_dir: str - Path of the directory to store any user-given
         overwrite files.
@@ -46,6 +44,7 @@ def get_target_elec_rate(
 
     # Get the historical reference values
     reference_df = pd.read_csv(reference_sector_elec_rate, index_col=0)
+    countries = reference_df.index.tolist()
     if not use_historical:
         # If not use the historical values, go for the config-defined defaults
         target_df = reference_df.copy().map(
@@ -173,9 +172,8 @@ def get_target_elec_rate(
 
 if __name__ == "__main__":
     get_target_elec_rate(
-        countries=snakemake.params.countries,
         config=snakemake.params.config,
-        sector_overwrite_dir=snakemake.params.sector_overwrite_dir,
+        sector_overwrite_dir=snakemake.input.sector_overwrite_dir,
         reference_sector_elec_rate=snakemake.input.reference_sector_elec_rate,
         TFC_per_capita=snakemake.input.TFC_per_capita,
         sector_TFC_share=snakemake.input.sector_TFC_share,
