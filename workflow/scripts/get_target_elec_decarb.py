@@ -15,7 +15,6 @@ def scale_or_initialise(entry, relative, init):
 
 
 def get_target_elec_decarb(
-    countries: list,
     config: dict,
     sector_overwrite_dir: str,
     reference_sector_elec_decarb: str,
@@ -28,7 +27,6 @@ def get_target_elec_decarb(
     explicitly specified by the user.
 
     Parameters:
-    - countries: list - List of country codes to process, given in ISO3 codes.
     - config: dict - User-given configuration of this module.
     - sector_overwrite_dir: str - Path of the directory to store any user-given
         overwrite files.
@@ -51,6 +49,7 @@ def get_target_elec_decarb(
     ]
     reference = pd.read_csv(reference_sector_elec_decarb, index_col=0)[[sector]]
     reference_df = pd.DataFrame(columns=sectors, index=reference.index)
+    countries = reference_df.index.tolist()
     reference_df[:] = reference.values
 
     use_historical = config["historical_elec_decarb"]
@@ -136,9 +135,8 @@ def get_target_elec_decarb(
 
 if __name__ == "__main__":
     get_target_elec_decarb(
-        countries=snakemake.params.countries,
         config=snakemake.params.config,
-        sector_overwrite_dir=snakemake.params.sector_overwrite_dir,
+        sector_overwrite_dir=snakemake.input.sector_overwrite_dir,
         reference_sector_elec_decarb=snakemake.input.reference_sector_elec_decarb,
         output_file=snakemake.output.output_file,
     )

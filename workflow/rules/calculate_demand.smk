@@ -7,12 +7,6 @@ import os
 
 configfile: "config/config.yaml"
 
-# Get all available CSVs automatically
-available_countries = [
-    os.path.basename(f).split("_")[2]   # hard-coded, the part after the prefix
-    for f in glob.glob("<resources>/automatic/IEA_energy_balances/IEA_EnergyBalance_*.csv")
-]
-
 def get_scenario_config(wildcards):
     return config["scenarios"][wildcards.scenario]
 def get_year(wildcards):
@@ -32,7 +26,6 @@ rule get_target_TFC_per_capita:
         per capita for each country.
         """
     params:
-        countries=available_countries,
         config=lambda wildcards: config["scenarios"][f"{wildcards.scenario}"],
     input:
         reference_per_capita_TFC=lambda wc: (
@@ -52,9 +45,6 @@ rule get_target_sector_TFC_share:
         Prepare for the demand calculation by getting the target sector share in the
         total final consumption for each country.
         """
-    params:
-        countries=available_countries,
-        sector_overwrite_dir="<resources>/user/sector_level_overwrite",
     input:
         TFC_per_capita="<resources>/prepare/target_per_capita_TFC_{scenario}.csv",
         reference_sector_TFC_share=lambda wc: (
@@ -62,7 +52,8 @@ rule get_target_sector_TFC_share:
         ),
         reference_per_capita_TFC=lambda wc: (
             f"<resources>/processed/IEA_historical_per_capita_TFC_{get_year(wc)}.csv"
-        )
+        ),
+        sector_overwrite_dir="<resources>/user/sector_level_overwrite_{scenario}",
     conda:
         "../envs/default.yaml"
     output:
@@ -108,13 +99,12 @@ rule get_target_elec_decarb:
         the global value defined in config.
         """
     params:
-        countries=available_countries,
         config=lambda wildcards: config["scenarios"][f"{wildcards.scenario}"],
-        sector_overwrite_dir="<resources>/user/sector_level_overwrite",
     input:
         reference_sector_elec_decarb=lambda wc: (
             f"<resources>/processed/IEA_historical_elec_decarb_{get_year(wc)}.csv"
-        )
+        ),
+        sector_overwrite_dir="<resources>/user/sector_level_overwrite_{scenario}",
     output:
         output_file="<resources>/prepare/target_elec_decarb_{scenario}.csv"
     conda:
@@ -133,13 +123,12 @@ rule get_target_non_elec_decarb:
         the global value defined in config.
         """
     params:
-        countries=available_countries,
         config=lambda wildcards: config["scenarios"][f"{wildcards.scenario}"],
-        sector_overwrite_dir="<resources>/user/sector_level_overwrite",
     input:
         reference_sector_non_elec_decarb=lambda wc: (
             f"<resources>/processed/IEA_historical_non_elec_decarb_{get_year(wc)}.csv"
-        )
+        ),
+        sector_overwrite_dir="<resources>/user/sector_level_overwrite_{scenario}",
     conda:
         "../envs/default.yaml"
     output:

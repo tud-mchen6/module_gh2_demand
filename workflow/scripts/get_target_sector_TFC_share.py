@@ -4,7 +4,6 @@ import os
 
 
 def get_target_sector_TFC_share(
-    countries: list,
     sector_overwrite_dir: str,
     reference_per_capita_TFC: str,
     reference_sector_TFC_share: str,
@@ -18,7 +17,6 @@ def get_target_sector_TFC_share(
     explicitly specified by the user.
 
     Parameters:
-    - countries: list - List of country codes to process, given in ISO3 codes.
     - sector_overwrite_dir: str - Path to the directory containing the sectoral
         share overwrites for each country.
     - reference_per_capita_TFC: str - Path to the historical values of per capita TFC.
@@ -30,6 +28,7 @@ def get_target_sector_TFC_share(
 
     # Get the historical reference values
     reference_df = pd.read_csv(reference_sector_TFC_share, index_col=0)
+    countries = reference_df.index.tolist()
     target_df = reference_df.copy()
 
     # Get all the files in the user folder (no template)
@@ -140,8 +139,7 @@ def get_target_sector_TFC_share(
 
 if __name__ == "__main__":
     get_target_sector_TFC_share(
-        countries=snakemake.params.countries,
-        sector_overwrite_dir=snakemake.params.sector_overwrite_dir,
+        sector_overwrite_dir=snakemake.input.sector_overwrite_dir,
         reference_per_capita_TFC=snakemake.input.reference_per_capita_TFC,
         reference_sector_TFC_share=snakemake.input.reference_sector_TFC_share,
         output_file=snakemake.output.output_file,

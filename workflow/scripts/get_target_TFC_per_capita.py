@@ -23,6 +23,7 @@ def get_target_TFC_per_capita(
             {"TFC_per_capita": tot_per_capita_TFC}, index=historical_TFC_df.index
         )
         # Check if any country-specific input is defined by user
+        # TODO: update with glom
         if "overrides" in config and config["overrides"]:
             for country, country_config in config["overrides"].items():
                 if "tot_per_capita_TFC" in country_config:
@@ -38,6 +39,5 @@ if __name__ == "__main__":
     get_target_TFC_per_capita(
         reference_per_capita_TFC=snakemake.input.reference_per_capita_TFC,
         config=snakemake.params.config,
-        # country_overwrite=snakemake.input.country_overwrite,
         output_file=snakemake.output.output_file,
     )

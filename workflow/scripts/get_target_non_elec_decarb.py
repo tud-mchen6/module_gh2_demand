@@ -13,7 +13,6 @@ def scale_or_initialise(entry, relative, init):
 
 
 def get_target_non_elec_decarb(
-    countries: list,
     config: dict,
     sector_overwrite_dir: str,
     reference_sector_non_elec_decarb: str,
@@ -26,7 +25,6 @@ def get_target_non_elec_decarb(
     explicitly specified by the user.
 
     Parameters:
-    - countries: list - List of country codes to process, given in ISO3 codes.
     - config: dict - User-given configuration of this module.
     - sector_overwrite_dir: str - Path of the directory to store any user-given
         overwrite files.
@@ -42,6 +40,7 @@ def get_target_non_elec_decarb(
     # Get the historical reference values
     # sector = 'ELEC_DECARB'
     reference_df = pd.read_csv(reference_sector_non_elec_decarb, index_col=0)
+    countries = reference_df.index.tolist()
     if not use_historical:
         target_df = reference_df.copy().map(
             lambda x: scale_or_initialise(
@@ -115,6 +114,7 @@ def get_target_non_elec_decarb(
                     print(
                         "Input error: given country not present in analysed countries."
                     )
+        target_df = target_df.sort_index().round(4)
     else:
         target_df = reference_df
     target_df = target_df.sort_index().round(4)
@@ -125,9 +125,8 @@ def get_target_non_elec_decarb(
 
 if __name__ == "__main__":
     get_target_non_elec_decarb(
-        countries=snakemake.params.countries,
         config=snakemake.params.config,
-        sector_overwrite_dir=snakemake.params.sector_overwrite_dir,
+        sector_overwrite_dir=snakemake.input.sector_overwrite_dir,
         reference_sector_non_elec_decarb=snakemake.input.reference_sector_non_elec_decarb,
         output_file=snakemake.output.output_file,
     )
